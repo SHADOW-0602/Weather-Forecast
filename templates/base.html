@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <h1 class="app-title">Weather Forecast System</h1>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Home</a></li>
+                <li><a href="{{ url_for('predict') }}" {% if request.endpoint == 'predict' %}class="active"{% endif %}>Predict</a></li>
+                <li><a href="{{ url_for('historical') }}" {% if request.endpoint == 'historical' %}class="active"{% endif %}>Historical</a></li>
+                <li><a href="{{ url_for('explore') }}" {% if request.endpoint == 'explore' %}class="active"{% endif %}>Explore</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="app-main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                {{ message }}
+                                <button class="flash-close">×</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    <footer class="app-footer">
+        <p>© {{ now.year }} Weather Forecast App. All Rights Reserved</p>
+    </footer>
+    <script src="{{ url_for('static', filename='css/js/main.js') }}"></script>
+</body>
+</html>

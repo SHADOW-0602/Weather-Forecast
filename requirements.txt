@@ -1,0 +1,13 @@
+flask==2.3.3
+werkzeug==2.3.8  # Explicitly pin Flask's companion
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.1
+requests==2.32.3
+geopy==2.4.1
+plotly==5.24.1
+schedule==1.2.2
+python-dotenv==1.0.0
+gunicorn==21.2.0  # For production deployment
+python-dateutil==2.9.0  # Helpful for date handling
+pytest==8.2.0  # For testing

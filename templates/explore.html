@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="data-card">
+    <h2>Weather Data Exploration</h2>
+    
+    {% if stats %}
+    <div class="metric-grid">
+        <div class="metric-card">
+            <h4>Temperature</h4>
+            <div class="metric-value">{{ stats.temperature.mean }}°C</div>
+            <table class="data-table">
+                <tr>
+                    <td>Min</td>
+                    <td>{{ stats.temperature.min }}°C</td>
+                </tr>
+                <tr>
+                    <td>Max</td>
+                    <td>{{ stats.temperature.max }}°C</td>
+                </tr>
+                <tr>
+                    <td>Median</td>
+                    <td>{{ stats.temperature.median }}°C</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="metric-card">
+            <h4>Humidity</h4>
+            <div class="metric-value">{{ stats.humidity.mean }}%</div>
+            <table class="data-table">
+                <tr>
+                    <td>Min</td>
+                    <td>{{ stats.humidity.min }}%</td>
+                </tr>
+                <tr>
+                    <td>Max</td>
+                    <td>{{ stats.humidity.max }}%</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="metric-card">
+            <h4>Precipitation</h4>
+            <div class="metric-value">{{ stats.precipitation.total }} mm</div>
+            <table class="data-table">
+                <tr>
+                    <td>Max Daily</td>
+                    <td>{{ stats.precipitation.max }} mm</td>
+                </tr>
+                <tr>
+                    <td>Rainy Days</td>
+                    <td>{{ stats.precipitation.days_with_rain }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="metric-card">
+            <h4>Weather Conditions</h4>
+            <table class="data-table">
+                {% for condition, count in stats.weather_conditions.items() %}
+                <tr>
+                    <td>{{ condition }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">No weather data available for exploration</div>
+    {% endif %}
+</div>
+{% endblock %}

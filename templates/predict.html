@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-card">
+    <h2>Weather Prediction</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="date">Prediction Date:</label>
+            <input type="date" id="date" name="date" class="form-control" 
+                   min="{{ now.strftime('%Y-%m-%d') }}">
+            <small class="form-text">Leave blank for tomorrow's prediction</small>
+        </div>
+        <button type="submit" class="btn btn-block">Generate Prediction</button>
+    </form>
+</div>
+
+{% if prediction %}
+    {% if prediction.success %}
+        <div class="prediction-card">
+            <h3>Prediction Results</h3>
+            <div class="prediction-detail">
+                <strong>Location:</strong> {{ prediction.location }}
+            </div>
+            <div class="prediction-detail">
+                <strong>Date/Time:</strong> {{ prediction.datetime }}
+            </div>
+            <div class="prediction-detail">
+                <strong>Temperature:</strong> {{ prediction.temperature }}°C
+            </div>
+            <div class="prediction-detail">
+                <strong>Condition:</strong> {{ prediction.weather_condition }}
+            </div>
+            
+            <h4>Condition Probabilities:</h4>
+            <ul class="probability-list">
+                {% for condition, prob in prediction.condition_probabilities.items() %}
+                    <li>
+                        <span>{{ condition }}</span>
+                        <span>{{ "%.1f"|format(prob * 100) }}%</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
