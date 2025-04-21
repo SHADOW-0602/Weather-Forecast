@@ -1,6 +1,9 @@
 services:
   - type: web
-    name: Weather-Forecast
+    name: weather-app
     runtime: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    buildCommand: |
+      pip install -r requirements.txt
+      python -c "from weather_forecast import WeatherForecastSystem; w = WeatherForecastSystem(); w.save_models()" || true
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
