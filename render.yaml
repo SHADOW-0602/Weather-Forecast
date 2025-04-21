@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: weather-forecast-app
+    name: Weather-Forecast
     runtime: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn app:app"
