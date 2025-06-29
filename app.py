@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify
 from weather_forecast import WeatherForecastSystem
 import threading
 import schedule
@@ -130,9 +130,16 @@ def explore():
     
 @app.route('/config')
 def get_config():
-    return {
-        'geoapifyApiKey': os.getenv('GEOAPIFY_API_KEY')
-    }    
+    # Add validation for the API key
+    api_key = os.getenv('GEOAPIFY_API_KEY')
+    if not api_key:
+        logger.error("Geoapify API key not configured in environment variables")
+        return jsonify({"error": "API configuration missing"}), 500
+        
+    return jsonify({
+        'geoapifyApiKey': api_key,
+        'status': 'active'
+    })  
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

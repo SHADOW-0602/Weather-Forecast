@@ -73,36 +73,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         locationInput.addEventListener('input', async () => {
             const query = locationInput.value.trim();
-            console.log('Input query:', query); // Debug
-
-            if (query === '') {
+            
+            if (query.length < 2) {
                 suggestionsDropdown.innerHTML = '';
                 suggestionsDropdown.style.display = 'none';
                 return;
             }
 
             try {
-                const configResponse= await fetch('/config');
+                // First verify we have a valid API config
+                const configResponse = await fetch('/config');
+                if (!configResponse.ok) {
+                    throw new Error('Server configuration error');
+                }
+                
                 const config = await configResponse.json();
-                console.log('Fetching suggestions for:', query); // Debug
-                const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${config.geoapifyApiKey}`, {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
+                
+                if (!config.geoapifyApiKey) {
+                    throw new Error('Location services temporarily unavailable');
+                }
 
-                console.log('API response status:', response.status); // Debug
+                // Make the API request with error handling
+                const response = await fetch(
+                    `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${config.geoapifyApiKey}`,
+                    {
+                        signal: AbortSignal.timeout(5000) // 5 second timeout
+                    }
+                );
+                
                 if (!response.ok) {
-                    throw new Error(`API request failed with status ${response.status}`);
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.message || 'Location service error');
                 }
 
                 const data = await response.json();
-                console.log('API response data:', data); // Debug
-                displayResults(data.features || [], query.length);
+                displayResults(data.features || []);
             } catch (error) {
-                console.error('Fetch error:', error); // Debug
-                suggestionsDropdown.innerHTML = '<div class="suggestion-item" style="color: red;">Error fetching suggestions</div>';
-                suggestionsDropdown.style.display = 'block';
+                console.error('Autocomplete error:', error);
+                showError(error.message.includes('API') ? 
+                        'Service configuration issue' : 
+                        'Could not fetch locations');
             }
         });
 
