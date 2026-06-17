@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints
+.pytest_cache/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Project Specific Large Datasets
+sst_chunks/
+sst_extracted/
+*.zip
+*.tar.gz
+*.nc
+ocean_monthly.csv
+
+# Local Model Weights & Scalers
+saved_models/
+
+# Streamlit
+.streamlit/
+
+# Secrets & Configuration (Copernicus Key / Environment Tokens)
+.env
+.cdsapirc
