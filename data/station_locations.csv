@@ -1,0 +1,4 @@
+station_id,name,region,climate,elevation,lat,lon,ocean_basin
+SEATTLE,"Seattle, WA (SEATTLE)","Pacific Northwest","Temperate Oceanic",137,47.45,-122.31,sst_pacific_f
+NEW_YORK,"New York, NY (NEW_YORK)","Mid-Atlantic","Humid Continental",10,40.78,-73.97,sst_atlantic_f
+PHOENIX,"Phoenix, AZ (PHOENIX)","Southwest Desert","Hot Desert (BWh)",344,33.43,-112.01,sst_gulf_f

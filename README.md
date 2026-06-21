@@ -1,99 +1,93 @@
-# Multimodal Climate Change Impact Model — U.S. Environment
+# AeroClim: Climate Intelligence Platform
 
-This repository implements a **Multimodal Climate Hazard & Flood Predictor** that fuses land-based meteorological observations with satellite-derived ocean temperatures to predict localized climate hazard risks.
-
-## 🌟 Features
-- **Multimodal Fusion Architecture**: Integrates daily weather observations (air temperatures, precipitation) with Copernicus daily Satellite Sea Surface Temperature (SST).
-- **Hybrid Machine Learning & Deep Learning**:
-  - **LSTM (Deep Learning)**: Predicts average daily temperature trends based on 30-day temporal sequences.
-  - **Random Forest (Tabular Machine Learning)**: Classifies daily hazard risks using calculated meteorological indices (Heat Index, Wind Chill, Wet Bulb temperature, precipitation and temperature anomalies).
-  - **Late Fusion Meta-Learner**: Combines predictions from both models through a dense neural network to output the final Hazard Risk Probability.
-- **Dynamic Bounding-Box Downloader**: Fetches gridded NetCDF sea surface temperature data efficiently using Copernicus CDS API spatial subsetting.
-- **Interactive Dashboard**: Streamlit interface to visualize trends, load historical stations, and adjust slider parameters to compute hazard profiles in real-time.
+AeroClim is an interactive weather analytics, climate risk prediction, and machine learning dashboard designed to model extreme hazards (such as flash floods or severe storm fronts) through a physics-informed multimodal late-fusion framework.
 
 ---
 
-## 📐 Model Architecture
+## 🚀 Key Features
 
-```mermaid
-graph TD
-    A[Daily Land Weather Observations] --> B[Feature Engineering & Indices]
-    A --> C[30-Day Sequence Generator]
-    
-    D[Copernicus Satellite SST NetCDF] --> E[process_sst.py: Spatial Average]
-    E --> F[sst_daily_summary.csv]
-    
-    F -->|Merge on Date| B
-    F -->|Merge on Date| C
-    
-    B -->|10 Features| G[Random Forest Classifier]
-    C -->|5 Features: TMAX, TMIN, TAVG, PRCP, SST| H[LSTM Network]
-    
-    G -->|RF Probability| I[Late Fusion Neural Network]
-    H -->|LSTM Predicted TAVG| I
-    
-    I --> J[Fused Hazard Risk Probability & Diagnostic Output]
-```
+### 1. Multimodal Late Fusion Modeling
+AeroClim couples sequential temporal forecasting with tabular risk classification using three models:
+* **LSTM Network**: Analyzes a sliding window sequence of `(Batch, 30 Days, 5 Features)` (max/min temps, precipitation, and sea surface temperature) to forecast tomorrow's land temperature.
+* **Random Forest Classifier**: Integrates 19 atmospheric and oceanic teleconnection parameters to calculate raw hazard classification scores.
+* **Late Fusion Meta-Learner**: Concatenates both prediction streams and passes them to a Dense Feed-Forward Neural Network to compute the final **Fused Hazard Probability**.
 
----
-
-## 🛠️ Installation & Setup
-
-### 1. Install Dependencies
-Ensure you have Python 3.10+ installed. Install the package dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Configure Copernicus Climate Data Store (CDS) API
-To retrieve the Satellite Sea Surface Temperature dataset:
-1. Register/Log in to the [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/).
-2. Retrieve your personal access token (key) from your CDS profile.
-3. Create a local configuration file named `.cdsapirc` in the project root directory:
-   ```text
-   url: https://cds.climate.copernicus.eu/api
-   key: YOUR_PERSONAL_ACCESS_TOKEN
-   ```
-
----
-
-## 🚀 Running the Project
-
-### 1. Download Sea Surface Temperature Data
-Start the chunked background downloader to retrieve the SST NetCDF data (1980–2025):
-```bash
-python fetch_ecmwf.py
-```
-This saves data chunks sequentially in `sst_chunks/`.
-
-### 2. Extract & Compile NetCDF Files
-Run the pre-processing compiler to extract the NetCDF data, convert temperature values to Celsius, and generate the time-series summary `sst_daily_summary.csv`:
-```bash
-python process_sst.py
-```
-
-### 3. Train the Models
-Train the LSTM, Random Forest, and Late Fusion layers on the weather station simulator and SST data:
-```bash
-python train_now.py
-```
-This saves the serialized models and scalers into `saved_models/`.
-
-### 4. Run the Streamlit Dashboard
-Launch the interactive prediction and analytical dashboard locally:
-```bash
-streamlit run app.py
-```
-Navigate to the local URL (usually **http://localhost:8501**) in your web browser.
+### 2. Interactive Analytics Dashboard
+Built entirely in Streamlit, the platform features:
+* **Live NOAA Station Data**: View historical weather records, accumulated precipitation, and monthly summary tables for discovered stations.
+* **Sea Surface Temperature (SST)**: Visualizes historical trends of thermal gradients between land temperatures and ocean basins.
+* **Extreme Hazard Predictor**: Run live predictions using interactive sliders (max/min temp, dew point, wind, rain) with hazard ratings displayed on a custom Plotly **Speedometer Gauge**.
+* **Model Explanability**: Includes **SHAP relative attributions** (local factor influences) and **Gini global feature importances** (model weights).
+* **Radar & CNN Activations**: Generates side-by-side **Seaborn heatmaps** visualizing NEXRAD reflectivity grids and CNN Grad-CAM class activations.
+* **Data Lineage & Specifications**: Outlines feature engineering, coupled indices (heat index, wind chill, wet bulb, drought indexes), and model configuration.
 
 ---
 
 ## 📁 Repository Structure
-- `app.py`: Streamlit main dashboard and frontend interface.
-- `ml_model.py`: Core `HazardPredictor` pipeline containing feature engineering, LSTM, Random Forest, and Late Fusion implementation.
-- `noaa_client.py`: NOAA data client with a daily simulated weather generator fallback.
-- `fetch_ecmwf.py`: Script to download chunked satellite sea surface temperature data.
-- `process_sst.py`: NetCDF parser to extract and compile daily average SSTs.
-- `train_now.py`: Utility to train model weights from the CLI.
-- `requirements.txt`: Python package dependencies.
-- `.gitignore`: Files excluded from Git version control.
+
+```text
+├── assets/
+│   └── logo.png              # Application logo icon
+├── data/
+│   ├── station_locations.csv # Registry mapping coordinates, climate zones, elevation
+│   ├── seattle.csv           # Ingested daily station records (Seattle)
+│   ├── new_york.csv          # Ingested daily station records (New York)
+│   ├── phoenix.csv           # Ingested daily station records (Phoenix)
+│   ├── atmosphere.csv        # Auxiliary dew point, wind, humidity, pressure data
+│   ├── soil_moisture.csv     # Auxiliary soil parameters (volume, saturation)
+│   ├── climate_indices.csv   # Climate indexes (ENSO, PDO, NAO)
+│   └── ocean.csv             # Copernicus SST climate records
+├── saved_models/
+│   ├── lstm_final.keras      # Trained LSTM weights
+│   ├── rf_model.pkl          # Trained Random Forest classifier
+│   ├── fusion_final.keras    # Trained Late Fusion Meta-Learner
+│   ├── scaler_*.pkl          # MinMax scaling files
+│   └── metrics.json          # Compiled test set performance metrics
+├── app.py                    # Streamlit Dashboard application
+├── noaa_client.py            # Dynamic data parser & simulation engine
+├── ml_model.py               # Multimodal prediction & training pipeline
+├── gradcam_radar.py          # CNN Grad-CAM activation generator
+├── train_now.py              # CLI training automation script
+├── requirements.txt          # Python dependency list
+└── .gitignore                # Version control excludes
+```
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Install Dependencies
+Make sure you have Python 3.10+ installed. In your terminal, install the dependencies listed in `requirements.txt`:
+```powershell
+pip install -r requirements.txt
+```
+
+*Note: Streamlit, TensorFlow, Scikit-Learn, Plotly, Seaborn, and Matplotlib are required.*
+
+### 2. Train the Models (Optional)
+Pre-trained models are stored in `saved_models/`. However, you can re-train the models for any station using `train_now.py`:
+```powershell
+python train_now.py --city SEATTLE --days 1000
+```
+Parameters:
+* `--city`: Choose between `SEATTLE`, `NEW_YORK`, or `PHOENIX`.
+* `--days`: Historical lookback window range (defaults to 10000 days).
+
+### 3. Launch the Dashboard
+Run the Streamlit application through the Python interpreter:
+```powershell
+python -m streamlit run app.py
+```
+
+Open your browser and navigate to `http://localhost:8501`.
+
+---
+
+## 📊 Feature Engineering & Calculations
+
+The raw weather feeds are combined daily to engineer coupled indices:
+* **HEAT_INDEX**: Humiture index (apparent temperature felt by the human body).
+* **WIND_CHILL**: Perceived cold temperature due to wind flow.
+* **WET_BULB**: The evaporative limit of the air.
+* **DROUGHT_IDX**: Rolling 30-day precipitation deficits.
+* **SST_AIR_DIFF**: Coupled thermal gradient ($T_{AVG} - SST$) between land air temperature and sea surface temperature.

@@ -1,97 +1,156 @@
+"""
+Produces Gradient-weighted Class Activation Maps (Grad-CAM)
+for the CNN component of the AeroClim multimodal pipeline.
+
+References:
+  Selvaraju et al. (2017). Grad-CAM: Visual Explanations from Deep Networks
+  via Gradient-based Localization. ICCV. https://arxiv.org/abs/1610.02391
+"""
+
 import numpy as np
 import tensorflow as tf
 import cv2
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
-def make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index=None):
-    """
-    Computes a Grad-CAM activation heatmap for a given input image and CNN model.
 
-    Args:
-        img_array: Preprocessed input image tensor of shape (1, height, width, channels)
-        model: Trained Keras/TensorFlow model
-        last_conv_layer_name: String name of the final convolutional layer in the CNN
-        pred_index: Index of the target class to explain (defaults to top prediction)
+#  CORE GRAD-CAM FUNCTION
 
-    Returns:
-        A 2D numpy array representing the normalized heatmap (values between 0 and 1).
-    """
-    # 1. Create a model mapping inputs to last conv layer activations and predictions
+def make_gradcam_heatmap(
+    img_array: np.ndarray,
+    model: tf.keras.Model,
+    last_conv_layer_name: str,
+    pred_index: int | None = None,
+) -> np.ndarray:
     grad_model = tf.keras.models.Model(
-        inputs=[model.inputs],
-        outputs=[model.get_layer(last_conv_layer_name).output, model.output]
+        inputs=model.inputs,
+        outputs=[
+            model.get_layer(last_conv_layer_name).output,
+            model.output,
+        ],
     )
 
-    # 2. Track gradients using GradientTape
     with tf.GradientTape() as tape:
-        last_conv_layer_output, preds = grad_model(img_array)
+        conv_outputs, predictions = grad_model(img_array)
         if pred_index is None:
-            pred_index = tf.argmax(preds[0])
-        class_channel = preds[:, pred_index]
+            pred_index = int(tf.argmax(predictions[0]))
+        class_score = predictions[:, pred_index]
 
-    # 3. Compute gradients of target class w.r.t the last conv layer outputs
-    grads = tape.gradient(class_channel, last_conv_layer_output)
+    # Gradients of class score w.r.t. last conv layer
+    grads = tape.gradient(class_score, conv_outputs)
 
-    # 4. Global Average Pooling of gradients to compute importance weights
+    # Global-average-pool the gradients -> per-channel importance weights
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
 
-    # 5. Multiply the conv activations by the channel weights and sum across channels
-    last_conv_layer_output = last_conv_layer_output[0]
-    heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+    # Weighted combination of feature maps
+    conv_outputs = conv_outputs[0]
+    heatmap = conv_outputs @ pooled_grads[..., tf.newaxis]
     heatmap = tf.squeeze(heatmap)
 
-    # 6. Apply ReLU (keep only features contributing positively) and normalize
-    heatmap = tf.maximum(heatmap, 0)
-    if tf.reduce_max(heatmap) > 0:
-        heatmap = heatmap / tf.reduce_max(heatmap)
-        
+    # ReLU + normalise to [0, 1]
+    heatmap = tf.maximum(heatmap, 0.0)
+    max_val = tf.reduce_max(heatmap)
+    if max_val > 0:
+        heatmap = heatmap / max_val
+
     return heatmap.numpy()
 
-def overlay_gradcam_on_radar(img_path, heatmap, output_path="radar_heatmap.png", alpha=0.4):
-    """
-    Overlays the computed Grad-CAM heatmap onto the original radar image.
 
-    Args:
-        img_path: Path to the original radar image file
-        heatmap: Normalized Grad-CAM heatmap 2D array (values 0-1)
-        output_path: Path where the superimposed output image will be saved
-        alpha: Blending weight for the overlay (0.0 = only original, 1.0 = only heatmap)
-    """
-    # Load original image
+#  RADAR OVERLAY HELPER
+
+def overlay_gradcam_on_radar(
+    img_path: str,
+    heatmap: np.ndarray,
+    output_path: str = "radar_heatmap.png",
+    alpha: float = 0.40,
+    colormap: int = cv2.COLORMAP_JET,
+) -> np.ndarray:
     img = cv2.imread(img_path)
     if img is None:
-        raise ValueError(f"Could not load image at path: {img_path}")
+        raise FileNotFoundError(f"Could not load radar image: {img_path}")
 
-    # Scale heatmap to [0, 255] and resize to original image shape
-    heatmap = np.uint8(255 * heatmap)
-    heatmap_resized = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+    H, W = img.shape[:2]
 
-    # Apply Jet colormap (standard for meteorological/heat map themes)
-    color_heatmap = cv2.applyColorMap(heatmap_resized, cv2.COLORMAP_JET)
+    # Scale & resize heatmap
+    heatmap_u8 = np.uint8(255 * heatmap)
+    heatmap_resized = cv2.resize(heatmap_u8, (W, H))
 
-    # Superimpose/blend the images
-    superimposed_img = color_heatmap * alpha + img * (1 - alpha)
-    superimposed_img = np.clip(superimposed_img, 0, 255).astype(np.uint8)
+    # Apply meteorological colormap
+    color_heatmap = cv2.applyColorMap(heatmap_resized, colormap)
 
-    # Save to disk
-    cv2.imwrite(output_path, superimposed_img)
+    # Alpha blend
+    blended = np.clip(
+        color_heatmap * alpha + img * (1.0 - alpha), 0, 255
+    ).astype(np.uint8)
 
-    # Display plot
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-    
-    # Original
-    axes[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    axes[0].set_title("Original Radar Image")
-    axes[0].axis("off")
-    
-    # Heatmap Blend
-    axes[1].imshow(cv2.cvtColor(superimposed_img, cv2.COLOR_BGR2RGB))
-    axes[1].set_title("Grad-CAM Heatmap Overlay")
-    axes[1].axis("off")
-    
+    cv2.imwrite(output_path, blended)
+
+    # Side-by-side matplotlib display
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.patch.set_facecolor("#0f0c1b")
+
+    titles = ["Original Radar", "Grad-CAM Heatmap", "Blended Overlay"]
+    images_rgb = [
+        cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
+        cv2.cvtColor(color_heatmap, cv2.COLOR_BGR2RGB),
+        cv2.cvtColor(blended, cv2.COLOR_BGR2RGB),
+    ]
+
+    for ax, title, im in zip(axes, titles, images_rgb):
+        ax.imshow(im)
+        ax.set_title(title, color="white", fontsize=12, fontweight="bold")
+        ax.axis("off")
+
+    # Colorbar legend
+    norm = mcolors.Normalize(vmin=0, vmax=1)
+    sm = plt.cm.ScalarMappable(cmap="jet", norm=norm)
+    sm.set_array([])
+    cbar = fig.colorbar(sm, ax=axes, fraction=0.015, pad=0.02)
+    cbar.set_label("CNN Activation Intensity", color="white")
+    cbar.ax.yaxis.set_tick_params(color="white")
+    plt.setp(cbar.ax.yaxis.get_ticklabels(), color="white")
+
     plt.tight_layout()
+    plt.savefig(
+        output_path.replace(".png", "_figure.png"),
+        dpi=150, bbox_inches="tight",
+        facecolor=fig.get_facecolor(),
+    )
     plt.show()
-    print(f"Heatmap successfully overlaid and saved to {output_path}")
+    print(f"[GradCAM] Saved heatmap overlay -> {output_path}")
+    return blended
+
+
+#  SYNTHETIC HEATMAP GENERATOR (used when no real CNN is available)
+
+def generate_synthetic_heatmap(
+    height: int = 256,
+    width: int = 256,
+    n_storm_cells: int = 2,
+    seed: int = 42,
+) -> np.ndarray:
+    np.random.seed(seed)
+    heatmap = np.zeros((height, width), dtype=np.float32)
+
+    for _ in range(n_storm_cells):
+        # Random storm core centre
+        cy = np.random.randint(height // 4, 3 * height // 4)
+        cx = np.random.randint(width // 4,  3 * width // 4)
+        radius = np.random.randint(height // 8, height // 4)
+        intensity = np.random.uniform(0.6, 1.0)
+
+        # Gaussian blob
+        y, x = np.ogrid[:height, :width]
+        dist = np.sqrt((y - cy) ** 2 + (x - cx) ** 2)
+        blob = intensity * np.exp(-(dist ** 2) / (2 * (radius / 2) ** 2))
+        heatmap = np.maximum(heatmap, blob)
+
+    # Light background noise
+    heatmap += np.random.uniform(0, 0.08, (height, width))
+    heatmap = np.clip(heatmap, 0.0, 1.0)
+    return heatmap
+
 
 if __name__ == "__main__":
-    print("Grad-CAM TensorFlow utility module loaded.")
+    print("[GradCAM] Module loaded - AeroClim Grad-CAM utility.")
+    print("  Synthetic heatmap shape:", generate_synthetic_heatmap().shape)

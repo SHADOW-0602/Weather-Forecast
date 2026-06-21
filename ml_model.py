@@ -5,7 +5,6 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score, roc_auc_score, mean_squared_error, r2_score
-import streamlit as st
 
 TF_AVAILABLE = False
 try:
@@ -63,8 +62,8 @@ class HazardPredictor:
         if not pd.api.types.is_datetime64_any_dtype(df["Date"]):
             df["Date"] = pd.to_datetime(df["Date"])
             
-        daily_path = "ocean.csv"
-        monthly_path = "ocean_monthly.csv"
+        daily_path = "data/ocean.csv"
+        monthly_path = "data/ocean_monthly.csv"
         
         # 1. Try Daily Resolution Merge
         if os.path.exists(daily_path):
@@ -82,13 +81,16 @@ class HazardPredictor:
                 
                 # Map City_ID to appropriate ocean basin column
                 basin_mapping = {
-                    "SEATTLE": "sst_pacific_f",
-                    "KCQT": "sst_pacific_f",
+                    "SEATTLE":  "sst_pacific_f",
+                    "KCQT":    "sst_pacific_f",
                     "NEW_YORK": "sst_atlantic_f",
-                    "KPHL": "sst_atlantic_f",
-                    "KJAX": "sst_atlantic_f",
-                    "KCLT": "sst_atlantic_f",
-                    "KHOU": "sst_gulf_f",
+                    "KPHL":    "sst_atlantic_f",
+                    "KJAX":    "sst_atlantic_f",
+                    "KCLT":    "sst_atlantic_f",
+                    "KHOU":    "sst_gulf_f",
+                    "PHOENIX": "sst_gulf_f",
+                    "KIND":    "sst_atlantic_f",
+                    "KMDW":    "sst_atlantic_f",
                 }
                 
                 target_col = basin_mapping.get(city_id)
@@ -163,7 +165,7 @@ class HazardPredictor:
         
         # Fill missing new features with defaults so it doesn't break if files are missing
         defaults = {
-            "DEWPOINT_F": (T * 9/5 + 32) - 10.8,
+            "DEWPOINT_F": (T * 9/5 + 32) - 15.0,  # synthetic: ~15 F below air temp ( F)
             "WINDSPEED_MPH": 5.0,
             "PRESSURE_HPA": 1013.25,
             "HUMIDITY_PCT": 50.0,
@@ -295,7 +297,7 @@ class HazardPredictor:
         new_row = pd.DataFrame([[current_tmax, current_tmin, current_tavg, current_prcp, current_sst]], columns=needed)
         df = pd.concat([df[needed], new_row], ignore_index=True)
         
-        seq = df[needed].tail(30).ffill().fillna(18.0).values
+        seq = df[needed].tail(30).ffill().bfill().fillna(18.0).values
         if len(seq) < 30:
             pad = np.tile(seq[0], (30 - len(seq), 1))
             seq = np.vstack([pad, seq])
@@ -304,7 +306,7 @@ class HazardPredictor:
 
     def _make_lstm_data(self, df, seq_len=30):
         needed = ["TMAX", "TMIN", "TAVG", "PRCP", "SST"]
-        sub = df[needed].ffill().fillna(18.0).values
+        sub = df[needed].ffill().bfill().fillna(18.0).values
         X, y = [], []
         for i in range(seq_len, len(sub)):
             X.append(sub[i-seq_len:i])
@@ -527,9 +529,9 @@ class HazardPredictor:
             
             explanation = (
                 f"**Late Fusion Details**:\n"
-                f"- **LSTM Model** predicts a TAVG of **{lstm_temp_c:.1f}°C** tomorrow based on the last 30 days of land + SST observations.\n"
-                f"- **Random Forest Classifier** gives a raw risk of **{rf_prob*100.0:.1f}%** incorporating land indices and sea surface temperature (**{sst_val:.2f}°C**).\n"
-                f"- **Air-SST Difference**: **{sst_air_diff:.2f}°C** (Air TAVG: {current_temp:.1f}°C vs. SST: {sst_val:.1f}°C)."
+                f"- **LSTM Model** predicts a TAVG of **{lstm_temp_c:.1f} C** tomorrow based on the last 30 days of land + SST observations.\n"
+                f"- **Random Forest Classifier** gives a raw risk of **{rf_prob*100.0:.1f}%** incorporating land indices and sea surface temperature (**{sst_val:.2f} C**).\n"
+                f"- **Air-SST Difference**: **{sst_air_diff:.2f} C** (Air TAVG: {current_temp:.1f} C vs. SST: {sst_val:.1f} C)."
             )
         else:
             lstm_temp_c = current_temp
@@ -537,8 +539,8 @@ class HazardPredictor:
             explanation = (
                 f"**Pure Random Forest Model**:\n"
                 f"- **LSTM / Fusion Model Unavailable** due to environment constraints. Using Random Forest alone.\n"
-                f"- **Random Forest Classifier** gives a raw risk of **{rf_prob*100.0:.1f}%** incorporating land indices, soil moisture, climate indices and sea surface temperature (**{sst_val:.2f}°C**).\n"
-                f"- **Air-SST Difference**: **{sst_air_diff:.2f}°C** (Air TAVG: {current_temp:.1f}°C vs. SST: {sst_val:.1f}°C)."
+                f"- **Random Forest Classifier** gives a raw risk of **{rf_prob*100.0:.1f}%** incorporating land indices, soil moisture, climate indices and sea surface temperature (**{sst_val:.2f} C**).\n"
+                f"- **Air-SST Difference**: **{sst_air_diff:.2f} C** (Air TAVG: {current_temp:.1f} C vs. SST: {sst_val:.1f} C)."
             )
 
         # Calculate local contributions
