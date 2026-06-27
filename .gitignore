@@ -12,6 +12,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+video_downloader/downloads/
+video_downloader/.streamlit/secrets.toml
 eggs/
 .eggs/
 lib/
@@ -143,3 +145,25 @@ cython_debug/
 saved_models/
 radar_heatmap.png
 radar_heatmap_figure.png
+
+# Temp files
+.tmp/
+.temp/
+
+# Reports
+report_output/
+
+# NOAA & ERA5 downloaded/extracted datasets
+data/noaa_stations/
+data/noaa_atmosphere/
+data/noaa_atmosphere_repaired/
+data/soil_moisture/
+data/event_labels_raw/
+data/mrms_raw/
+data/mrms_images/
+data/mrms_historical_raw/
+data/mrms_historical_images/
+
+# Generated data health and labels
+data/data_health.json
+data/event_labels.csv

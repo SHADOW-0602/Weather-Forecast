@@ -1,18 +1,18 @@
 import argparse
 import datetime
-from noaa_client import NOAAClient
+from noaa_client import CITIES, NOAAClient
 from ml_model import HazardPredictor
 
 # -- CLI arguments -----------------------------------------------------
 parser = argparse.ArgumentParser(description="Train AeroClim multimodal models.")
 parser.add_argument(
     "--city", type=str, default="SEATTLE",
-    choices=["SEATTLE", "NEW_YORK", "PHOENIX"],
-    help="Station ID to train on (default: SEATTLE)"
+    choices=sorted(CITIES),
+    help="Configured city alias or NOAA station ID (default: SEATTLE)"
 )
 parser.add_argument(
-    "--days", type=int, default=10000,
-    help="Number of historical days to load (default: 10000 ~ 27 years)"
+    "--days", type=int, default=12000,
+    help="Historical lookback days (default: 12000, covering the full archive)"
 )
 args = parser.parse_args()
 
@@ -21,7 +21,8 @@ client    = NOAAClient()
 predictor = HazardPredictor()
 
 today      = datetime.date.today()
-start_date = today - datetime.timedelta(days=args.days)
+archive_start = datetime.date(1995, 1, 1)
+start_date = max(today - datetime.timedelta(days=args.days), archive_start)
 
 print(f"[train_now] Loading {args.days} days of weather data for {args.city} ...")
 df = client.fetch_weather_data(
@@ -35,8 +36,8 @@ print(f"[train_now] Loaded {len(df):,} rows  |  "
 if len(df) < 200:
     raise RuntimeError(
         f"Only {len(df)} rows returned - not enough to train. "
-        "Check that data/seattle.csv / data/new_york.csv / data/phoenix.csv exists "
-        "or increase --days."
+        "Check the station file under data/noaa_stations/ and run "
+        "tools/audit_data_health.py, or increase --days."
     )
 
 # -- Training ----------------------------------------------------------
@@ -65,6 +66,7 @@ if predictor.metrics:
           f"AUC-ROC: {m.get('rf_auc', 0):.4f}")
     if m.get("lstm_r2", 0) != 0:
         print(f"  LSTM- R2:       {m.get('lstm_r2', 0):.4f}  "
-              f"MSE: {m.get('lstm_mse', 0):.4f}")
+              f"MAE: {m.get('lstm_mae_c', 0):.2f} C  "
+              f"RMSE: {m.get('lstm_rmse_c', 0):.2f} C")
     print(f"  Fusion - Accuracy: {m.get('fusion_accuracy', 0):.4f}  "
           f"AUC-ROC: {m.get('fusion_auc', 0):.4f}")

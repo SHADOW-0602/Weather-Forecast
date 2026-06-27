@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroClim: MRMS Radar Dataset Gallery</title>
+    
+    <!-- Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #07080d;
+            --surface-color: #0f111a;
+            --surface-accent: rgba(0, 242, 254, 0.08);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --accent: #ff0844;
+            --text-main: #c5a880;
+            --text-light: #ffffff;
+            --text-muted: #8d99ae;
+            --glass-bg: rgba(15, 23, 42, 0.45);
+            --glass-border: rgba(0, 242, 254, 0.15);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 8, 68, 0.05) 0px, transparent 50%);
+            padding-bottom: 5rem;
+        }
+
+        header {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .logo-section i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+        }
+
+        .logo-section h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Filter Section Styling */
+        .filter-container {
+            max-width: 1400px;
+            margin: 0 auto 2.5rem auto;
+            padding: 0 2rem;
+        }
+
+        .filter-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.8rem;
+            background-color: rgba(11, 12, 16, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-light);
+            outline: none;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .chips-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1rem;
+            background-color: var(--surface-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            background-color: var(--surface-accent);
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.15);
+        }
+
+        .toggle-group {
+            display: flex;
+            background-color: rgba(11, 12, 16, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--primary);
+            color: var(--bg-color);
+            box-shadow: 0 2px 8px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Gallery Grid Layout */
+        .gallery-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px 0 rgba(0, 242, 254, 0.15);
+        }
+
+        .image-container {
+            width: 100%;
+            background-color: #000;
+            position: relative;
+            padding-bottom: 35%; /* Aspect ratio matching the side-by-side plots */
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .gallery-card:hover .image-container img {
+            transform: scale(1.03);
+        }
+
+        .card-details {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sample-index {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .category-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-severe { background-color: rgba(255, 8, 68, 0.15); color: #ff0844; border: 1px solid rgba(255, 8, 68, 0.3); }
+        .badge-conv { background-color: rgba(79, 172, 254, 0.15); color: #4facfe; border: 1px solid rgba(79, 172, 254, 0.3); }
+        .badge-rain { background-color: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3); }
+        .badge-clear { background-color: rgba(141, 153, 174, 0.15); color: #8d99ae; border: 1px solid rgba(141, 153, 174, 0.3); }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.85rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .probability-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .probability-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .label-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+        }
+
+        .label-positive {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .label-negative {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Modal Popup Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 5000;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(7, 8, 13, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--surface-color);
+            border: 1px solid var(--glass-border);
+            max-width: 1100px;
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 242, 254, 0.2);
+            position: relative;
+            animation: modalScale 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: var(--text-muted);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .close-btn:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 15px;
+        }
+
+        .modal-title-row h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-image-container {
+            width: 100%;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .modal-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .modal-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .modal-stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .modal-stat-card span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal-stat-card h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        /* Error/Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 968px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+            .modal-stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 2rem 1rem;
+            }
+            .logo-section h1 {
+                font-size: 1.7rem;
+            }
+            .filter-card {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                min-width: 100%;
+            }
+            .gallery-grid {
+                padding: 0 1rem;
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                padding: 1rem;
+            }
+            .modal-body {
+                padding: 1.5rem;
+            }
+            .modal-title-row h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Dashboard Header -->
+    <header>
+        <div class="logo-section">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <h1>AeroClim MRMS Radar Gallery</h1>
+        </div>
+        <p>Interactive dataset visualization for 2D weather radar image chips ($64 \times 64$ grids). Browse reflectivity composites, precipitation estimates (QPE), and azimuthal wind shear channels.</p>
+    </header>
+
+    <!-- Filters Interface -->
+    <div class="filter-container">
+        <div class="filter-card">
+            <!-- Search Index -->
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" class="search-input" placeholder="Search by sample index (e.g. 142)...">
+            </div>
+
+            <!-- Categories -->
+            <div class="chips-group" id="chips-group">
+                <span class="filter-chip active" data-category="all">All Channels</span>
+                <span class="filter-chip" data-category="Severe Storm">Severe Storms</span>
+                <span class="filter-chip" data-category="Convective Activity">Convective Activity</span>
+                <span class="filter-chip" data-category="Light Rain">Light Rain</span>
+                <span class="filter-chip" data-category="Clear Sky">Clear Skies</span>
+            </div>
+
+            <!-- Labels Toggle -->
+            <div class="toggle-group" id="label-toggle">
+                <button class="toggle-btn active" data-label="all">All Labels</button>
+                <button class="toggle-btn" data-label="1">Label 1 (Event)</button>
+                <button class="toggle-btn" data-label="0">Label 0 (Non-Event)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <main class="gallery-grid" id="gallery-grid">
+        <!-- Rendered dynamically by JavaScript -->
+    </main>
+
+    <!-- Modal Popup Details -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <span class="close-btn" id="modal-close"><i class="fa-solid fa-xmark"></i></span>
+            <div class="modal-body">
+                <div class="modal-title-row">
+                    <h2 id="modal-title">Sample Index xxx</h2>
+                    <span class="category-badge" id="modal-badge">Severe Storm</span>
+                </div>
+                
+                <div class="modal-image-container">
+                    <img id="modal-image" src="" alt="MRMS Channels">
+                </div>
+                
+                <div class="modal-stat-grid">
+                    <div class="modal-stat-card">
+                        <span>CNN Probability</span>
+                        <h4 id="stat-prob" style="color: var(--primary);">92.4%</h4>
+                    </div>
+                    <div class="modal-stat-card">
+                        <span>Max Reflectivity</span>
+                        <h4 id="stat-refl">0.72</h4>
+                    </div>
+                    <div class="modal-stat-card">
+                        <span>Max QPE 1H</span>
+                        <h4 id="stat-qpe">0.60</h4>
+                    </div>
+                    <div class="modal-stat-card">
+                        <span>Max AzShear</span>
+                        <h4 id="stat-shear">1.00</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Embedded manifest JSON data to prevent local CORS errors
+        const MANIFEST = [
+          {
+            "index": 142,
+            "label": 1,
+            "probability": 0.530561089515686,
+            "max_reflectivity": 0.699999988079071,
+            "max_qpe": 0.2460000067949295,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_142.png"
+          },
+          {
+            "index": 143,
+            "label": 1,
+            "probability": 0.58048415184021,
+            "max_reflectivity": 0.7235293984413147,
+            "max_qpe": 0.6019999980926514,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_143.png"
+          },
+          {
+            "index": 151,
+            "label": 1,
+            "probability": 0.5378941297531128,
+            "max_reflectivity": 0.6470588445663452,
+            "max_qpe": 0.24400000274181366,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_151.png"
+          },
+          {
+            "index": 157,
+            "label": 1,
+            "probability": 0.38030868768692017,
+            "max_reflectivity": 0.30588236451148987,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_157.png"
+          },
+          {
+            "index": 160,
+            "label": 1,
+            "probability": 0.37647032737731934,
+            "max_reflectivity": 0.5176470875740051,
+            "max_qpe": 0.004000000189989805,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_160.png"
+          },
+          {
+            "index": 163,
+            "label": 1,
+            "probability": 0.39288008213043213,
+            "max_reflectivity": 0.3176470696926117,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_163.png"
+          },
+          {
+            "index": 168,
+            "label": 1,
+            "probability": 0.3922966718673706,
+            "max_reflectivity": 0.38235294818878174,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_168.png"
+          },
+          {
+            "index": 171,
+            "label": 1,
+            "probability": 0.5675945281982422,
+            "max_reflectivity": 0.5764706134796143,
+            "max_qpe": 0.03799999877810478,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_171.png"
+          },
+          {
+            "index": 185,
+            "label": 1,
+            "probability": 0.4910939633846283,
+            "max_reflectivity": 0.5176470875740051,
+            "max_qpe": 0.0819999948143959,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_185.png"
+          },
+          {
+            "index": 188,
+            "label": 1,
+            "probability": 0.42101335525512695,
+            "max_reflectivity": 0.4470588266849518,
+            "max_qpe": 0.01600000075995922,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_188.png"
+          },
+          {
+            "index": 196,
+            "label": 1,
+            "probability": 0.38404589891433716,
+            "max_reflectivity": 0.39411765336990356,
+            "max_qpe": 0.01600000075995922,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_196.png"
+          },
+          {
+            "index": 202,
+            "label": 1,
+            "probability": 0.4113037884235382,
+            "max_reflectivity": 0.3235294222831726,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_202.png"
+          },
+          {
+            "index": 228,
+            "label": 1,
+            "probability": 0.3791600167751312,
+            "max_reflectivity": 0.34117648005485535,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_228.png"
+          },
+          {
+            "index": 236,
+            "label": 1,
+            "probability": 0.4196944236755371,
+            "max_reflectivity": 0.3117647171020508,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_236.png"
+          },
+          {
+            "index": 242,
+            "label": 1,
+            "probability": 0.45703551173210144,
+            "max_reflectivity": 0.364705890417099,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_242.png"
+          },
+          {
+            "index": 245,
+            "label": 1,
+            "probability": 0.5546563863754272,
+            "max_reflectivity": 0.6235294342041016,
+            "max_qpe": 0.5419999957084656,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_245.png"
+          },
+          {
+            "index": 253,
+            "label": 1,
+            "probability": 0.40243732929229736,
+            "max_reflectivity": 0.3117647171020508,
+            "max_qpe": 0.009999999776482582,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_253.png"
+          },
+          {
+            "index": 259,
+            "label": 1,
+            "probability": 0.4647359549999237,
+            "max_reflectivity": 0.6470588445663452,
+            "max_qpe": 0.11600000411272049,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_259.png"
+          },
+          {
+            "index": 262,
+            "label": 1,
+            "probability": 0.46959272027015686,
+            "max_reflectivity": 0.5176470875740051,
+            "max_qpe": 0.1080000028014183,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_262.png"
+          },
+          {
+            "index": 270,
+            "label": 1,
+            "probability": 0.3971671760082245,
+            "max_reflectivity": 0.30588236451148987,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_270.png"
+          },
+          {
+            "index": 276,
+            "label": 1,
+            "probability": 0.39231011271476746,
+            "max_reflectivity": 0.39411765336990356,
+            "max_qpe": 0.041999999433755875,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_276.png"
+          },
+          {
+            "index": 279,
+            "label": 1,
+            "probability": 0.37797805666923523,
+            "max_reflectivity": 0.529411792755127,
+            "max_qpe": 0.041999999433755875,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_279.png"
+          },
+          {
+            "index": 296,
+            "label": 1,
+            "probability": 0.3871557414531708,
+            "max_reflectivity": 0.4588235318660736,
+            "max_qpe": 0.006000000052154064,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_296.png"
+          },
+          {
+            "index": 314,
+            "label": 1,
+            "probability": 0.3815746009349823,
+            "max_reflectivity": 0.30588236451148987,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_314.png"
+          },
+          {
+            "index": 328,
+            "label": 1,
+            "probability": 0.4326271116733551,
+            "max_reflectivity": 0.5588235259056091,
+            "max_qpe": 0.03799999877810478,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_328.png"
+          },
+          {
+            "index": 22,
+            "label": 0,
+            "probability": 0.4183315634727478,
+            "max_reflectivity": 0.4882352948188782,
+            "max_qpe": 0.009999999776482582,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_22.png"
+          },
+          {
+            "index": 24,
+            "label": 0,
+            "probability": 0.4822593033313751,
+            "max_reflectivity": 0.42941176891326904,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_24.png"
+          },
+          {
+            "index": 61,
+            "label": 0,
+            "probability": 0.4263320565223694,
+            "max_reflectivity": 0.38235294818878174,
+            "max_qpe": 0.017999999225139618,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_61.png"
+          },
+          {
+            "index": 72,
+            "label": 0,
+            "probability": 0.43663832545280457,
+            "max_reflectivity": 0.4529411792755127,
+            "max_qpe": 0.006000000052154064,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_72.png"
+          },
+          {
+            "index": 75,
+            "label": 0,
+            "probability": 0.568568229675293,
+            "max_reflectivity": 0.6117647290229797,
+            "max_qpe": 0.3059999942779541,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_75.png"
+          },
+          {
+            "index": 84,
+            "label": 0,
+            "probability": 0.530214786529541,
+            "max_reflectivity": 0.5823529362678528,
+            "max_qpe": 0.07000000029802322,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_84.png"
+          },
+          {
+            "index": 89,
+            "label": 0,
+            "probability": 0.5845400094985962,
+            "max_reflectivity": 0.6470588445663452,
+            "max_qpe": 0.3140000104904175,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_89.png"
+          },
+          {
+            "index": 91,
+            "label": 0,
+            "probability": 0.539267897605896,
+            "max_reflectivity": 0.5941176414489746,
+            "max_qpe": 0.10000000149011612,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_91.png"
+          },
+          {
+            "index": 92,
+            "label": 0,
+            "probability": 0.5760132074356079,
+            "max_reflectivity": 0.6117647290229797,
+            "max_qpe": 0.09800000488758087,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_92.png"
+          },
+          {
+            "index": 97,
+            "label": 0,
+            "probability": 0.39550521969795227,
+            "max_reflectivity": 0.3588235378265381,
+            "max_qpe": 0.0020000000949949026,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_97.png"
+          },
+          {
+            "index": 99,
+            "label": 0,
+            "probability": 0.3819126784801483,
+            "max_reflectivity": 0.44117647409439087,
+            "max_qpe": 0.03200000151991844,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_99.png"
+          },
+          {
+            "index": 101,
+            "label": 0,
+            "probability": 0.5382291078567505,
+            "max_reflectivity": 0.48235294222831726,
+            "max_qpe": 0.16600000858306885,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_101.png"
+          },
+          {
+            "index": 106,
+            "label": 0,
+            "probability": 0.45196571946144104,
+            "max_reflectivity": 0.5764706134796143,
+            "max_qpe": 0.03799999877810478,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_106.png"
+          },
+          {
+            "index": 107,
+            "label": 0,
+            "probability": 0.39317891001701355,
+            "max_reflectivity": 0.3529411852359772,
+            "max_qpe": 0.0,
+            "max_shear": 1.0,
+            "category": "Convective Activity",
+            "image_file": "assets/mrms_gallery/sample_107.png"
+          },
+          {
+            "index": 109,
+            "label": 0,
+            "probability": 0.5169007778167725,
+            "max_reflectivity": 0.5470588207244873,
+            "max_qpe": 0.03999999910593033,
+            "max_shear": 1.0,
+            "category": "Severe Storm",
+            "image_file": "assets/mrms_gallery/sample_109.png"
+          },
+          {
+            "index": 1,
+            "label": 0,
+            "probability": 0.37224599719047546,
+            "max_reflectivity": 0.0470588244497776,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_1.png"
+          },
+          {
+            "index": 2,
+            "label": 0,
+            "probability": 0.37206754088401794,
+            "max_reflectivity": 0.0470588244497776,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_2.png"
+          },
+          {
+            "index": 10,
+            "label": 0,
+            "probability": 0.3720499277114868,
+            "max_reflectivity": 0.029411764815449715,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_10.png"
+          },
+          {
+            "index": 15,
+            "label": 0,
+            "probability": 0.3722241520881653,
+            "max_reflectivity": 0.1352941244840622,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_15.png"
+          },
+          {
+            "index": 16,
+            "label": 0,
+            "probability": 0.3723570704460144,
+            "max_reflectivity": 0.03529411926865578,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_16.png"
+          },
+          {
+            "index": 18,
+            "label": 0,
+            "probability": 0.3720560073852539,
+            "max_reflectivity": 0.03529411926865578,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_18.png"
+          },
+          {
+            "index": 27,
+            "label": 0,
+            "probability": 0.3728845417499542,
+            "max_reflectivity": 0.08235294371843338,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_27.png"
+          },
+          {
+            "index": 32,
+            "label": 0,
+            "probability": 0.3725059926509857,
+            "max_reflectivity": 0.1411764770746231,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_32.png"
+          },
+          {
+            "index": 33,
+            "label": 0,
+            "probability": 0.3722054362297058,
+            "max_reflectivity": 0.06470588594675064,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_33.png"
+          },
+          {
+            "index": 35,
+            "label": 0,
+            "probability": 0.3722117841243744,
+            "max_reflectivity": 0.0470588244497776,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_35.png"
+          },
+          {
+            "index": 53,
+            "label": 0,
+            "probability": 0.3722445070743561,
+            "max_reflectivity": 0.07647059112787247,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_53.png"
+          },
+          {
+            "index": 95,
+            "label": 0,
+            "probability": 0.3773074746131897,
+            "max_reflectivity": 0.12352941185235977,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Light Rain",
+            "image_file": "assets/mrms_gallery/sample_95.png"
+          },
+          {
+            "index": 0,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_0.png"
+          },
+          {
+            "index": 3,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_3.png"
+          },
+          {
+            "index": 4,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_4.png"
+          },
+          {
+            "index": 5,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_5.png"
+          },
+          {
+            "index": 8,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_8.png"
+          },
+          {
+            "index": 9,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_9.png"
+          },
+          {
+            "index": 11,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_11.png"
+          },
+          {
+            "index": 13,
+            "label": 0,
+            "probability": 0.3719918727874756,
+            "max_reflectivity": 0.0,
+            "max_qpe": 0.0,
+            "max_shear": 0.5,
+            "category": "Clear Sky",
+            "image_file": "assets/mrms_gallery/sample_13.png"
+          }
+        ];
+
+        // DOM elements
+        const grid = document.getElementById('gallery-grid');
+        const searchInput = document.getElementById('search-input');
+        const chipsGroup = document.getElementById('chips-group');
+        const labelToggle = document.getElementById('label-toggle');
+        const modal = document.getElementById('detail-modal');
+        const modalClose = document.getElementById('modal-close');
+
+        // State variables
+        let selectedCategory = 'all';
+        let selectedLabel = 'all';
+        let searchQuery = '';
+
+        // Category class names mapping
+        function getBadgeClass(cat) {
+            switch(cat) {
+                case 'Severe Storm': return 'badge-severe';
+                case 'Convective Activity': return 'badge-conv';
+                case 'Light Rain': return 'badge-rain';
+                default: return 'badge-clear';
+            }
+        }
+
+        // Render gallery
+        function renderGallery() {
+            grid.innerHTML = '';
+            
+            // Filter manifest
+            const filtered = MANIFEST.filter(item => {
+                // Search filter
+                const matchesSearch = searchQuery === '' || item.index.toString().includes(searchQuery);
+                
+                // Category filter
+                const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+                
+                // Label filter
+                const matchesLabel = selectedLabel === 'all' || item.label.toString() === selectedLabel;
+                
+                return matchesSearch && matchesCategory && matchesLabel;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-cloud-sun-rain"></i>
+                        <h3>No radar chips match your filters</h3>
+                        <p>Try clearing your search query or choosing another category.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create cards
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                card.innerHTML = `
+                    <div class="image-container">
+                        <img src="${item.image_file}" alt="Sample ${item.index}">
+                    </div>
+                    <div class="card-details">
+                        <div class="card-header-row">
+                            <span class="sample-index">Index #${item.index}</span>
+                            <span class="category-badge ${getBadgeClass(item.category)}">${item.category}</span>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-item">Reflectivity: <span class="stat-value">${item.max_reflectivity.toFixed(2)}</span></div>
+                            <div class="stat-item">QPE 1H: <span class="stat-value">${item.max_qpe.toFixed(2)}</span></div>
+                            <div class="stat-item">AzShear: <span class="stat-value">${item.max_shear.toFixed(2)}</span></div>
+                            <div class="stat-item">Label: <span class="label-badge ${item.label === 1 ? 'label-positive' : 'label-negative'}">${item.label === 1 ? 'Event (1)' : 'Non-Event (0)'}</span></div>
+                        </div>
+                        <div class="card-footer">
+                            <span class="probability-label">CNN Probability</span>
+                            <span class="probability-value">${(item.probability * 100).toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Open modal on click
+                card.addEventListener('click', () => openModal(item));
+                grid.appendChild(card);
+            });
+        }
+
+        // Open detail modal
+        function openModal(item) {
+            document.getElementById('modal-title').innerText = `Sample Index #${item.index}`;
+            
+            const badge = document.getElementById('modal-badge');
+            badge.innerText = item.category;
+            badge.className = `category-badge ${getBadgeClass(item.category)}`;
+            
+            document.getElementById('modal-image').src = item.image_file;
+            document.getElementById('stat-prob').innerText = `${(item.probability * 100).toFixed(1)}%`;
+            document.getElementById('stat-refl').innerText = item.max_reflectivity.toFixed(3);
+            document.getElementById('stat-qpe').innerText = item.max_qpe.toFixed(3);
+            document.getElementById('stat-shear').innerText = item.max_shear.toFixed(3);
+            
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        modalClose.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close modal on clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Search Input listener
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            renderGallery();
+        });
+
+        // Category Chips listeners
+        chipsGroup.addEventListener('click', (e) => {
+            if (e.target.classList.contains('filter-chip')) {
+                // Update active chip
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                selectedCategory = e.target.getAttribute('data-category');
+                renderGallery();
+            }
+        });
+
+        // Label toggle listeners
+        labelToggle.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-btn')) {
+                // Update active toggle
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                selectedLabel = e.target.getAttribute('data-label');
+                renderGallery();
+            }
+        });
+
+        // Initial render
+        renderGallery();
+    </script>
+</body>
+</html>

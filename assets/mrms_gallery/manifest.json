@@ -1,0 +1,602 @@
+[
+  {
+    "index": 142,
+    "label": 1,
+    "probability": 0.530561089515686,
+    "max_reflectivity": 0.699999988079071,
+    "max_qpe": 0.2460000067949295,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_142.png"
+  },
+  {
+    "index": 143,
+    "label": 1,
+    "probability": 0.58048415184021,
+    "max_reflectivity": 0.7235293984413147,
+    "max_qpe": 0.6019999980926514,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_143.png"
+  },
+  {
+    "index": 151,
+    "label": 1,
+    "probability": 0.5378941297531128,
+    "max_reflectivity": 0.6470588445663452,
+    "max_qpe": 0.24400000274181366,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_151.png"
+  },
+  {
+    "index": 157,
+    "label": 1,
+    "probability": 0.38030868768692017,
+    "max_reflectivity": 0.30588236451148987,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_157.png"
+  },
+  {
+    "index": 160,
+    "label": 1,
+    "probability": 0.37647032737731934,
+    "max_reflectivity": 0.5176470875740051,
+    "max_qpe": 0.004000000189989805,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_160.png"
+  },
+  {
+    "index": 163,
+    "label": 1,
+    "probability": 0.39288008213043213,
+    "max_reflectivity": 0.3176470696926117,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_163.png"
+  },
+  {
+    "index": 168,
+    "label": 1,
+    "probability": 0.3922966718673706,
+    "max_reflectivity": 0.38235294818878174,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_168.png"
+  },
+  {
+    "index": 171,
+    "label": 1,
+    "probability": 0.5675945281982422,
+    "max_reflectivity": 0.5764706134796143,
+    "max_qpe": 0.03799999877810478,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_171.png"
+  },
+  {
+    "index": 185,
+    "label": 1,
+    "probability": 0.4910939633846283,
+    "max_reflectivity": 0.5176470875740051,
+    "max_qpe": 0.0819999948143959,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_185.png"
+  },
+  {
+    "index": 188,
+    "label": 1,
+    "probability": 0.42101335525512695,
+    "max_reflectivity": 0.4470588266849518,
+    "max_qpe": 0.01600000075995922,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_188.png"
+  },
+  {
+    "index": 196,
+    "label": 1,
+    "probability": 0.38404589891433716,
+    "max_reflectivity": 0.39411765336990356,
+    "max_qpe": 0.01600000075995922,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_196.png"
+  },
+  {
+    "index": 202,
+    "label": 1,
+    "probability": 0.4113037884235382,
+    "max_reflectivity": 0.3235294222831726,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_202.png"
+  },
+  {
+    "index": 228,
+    "label": 1,
+    "probability": 0.3791600167751312,
+    "max_reflectivity": 0.34117648005485535,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_228.png"
+  },
+  {
+    "index": 236,
+    "label": 1,
+    "probability": 0.4196944236755371,
+    "max_reflectivity": 0.3117647171020508,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_236.png"
+  },
+  {
+    "index": 242,
+    "label": 1,
+    "probability": 0.45703551173210144,
+    "max_reflectivity": 0.364705890417099,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_242.png"
+  },
+  {
+    "index": 245,
+    "label": 1,
+    "probability": 0.5546563863754272,
+    "max_reflectivity": 0.6235294342041016,
+    "max_qpe": 0.5419999957084656,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_245.png"
+  },
+  {
+    "index": 253,
+    "label": 1,
+    "probability": 0.40243732929229736,
+    "max_reflectivity": 0.3117647171020508,
+    "max_qpe": 0.009999999776482582,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_253.png"
+  },
+  {
+    "index": 259,
+    "label": 1,
+    "probability": 0.4647359549999237,
+    "max_reflectivity": 0.6470588445663452,
+    "max_qpe": 0.11600000411272049,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_259.png"
+  },
+  {
+    "index": 262,
+    "label": 1,
+    "probability": 0.46959272027015686,
+    "max_reflectivity": 0.5176470875740051,
+    "max_qpe": 0.1080000028014183,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_262.png"
+  },
+  {
+    "index": 270,
+    "label": 1,
+    "probability": 0.3971671760082245,
+    "max_reflectivity": 0.30588236451148987,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_270.png"
+  },
+  {
+    "index": 276,
+    "label": 1,
+    "probability": 0.39231011271476746,
+    "max_reflectivity": 0.39411765336990356,
+    "max_qpe": 0.041999999433755875,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_276.png"
+  },
+  {
+    "index": 279,
+    "label": 1,
+    "probability": 0.37797805666923523,
+    "max_reflectivity": 0.529411792755127,
+    "max_qpe": 0.041999999433755875,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_279.png"
+  },
+  {
+    "index": 296,
+    "label": 1,
+    "probability": 0.3871557414531708,
+    "max_reflectivity": 0.4588235318660736,
+    "max_qpe": 0.006000000052154064,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_296.png"
+  },
+  {
+    "index": 314,
+    "label": 1,
+    "probability": 0.3815746009349823,
+    "max_reflectivity": 0.30588236451148987,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_314.png"
+  },
+  {
+    "index": 328,
+    "label": 1,
+    "probability": 0.4326271116733551,
+    "max_reflectivity": 0.5588235259056091,
+    "max_qpe": 0.03799999877810478,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_328.png"
+  },
+  {
+    "index": 22,
+    "label": 0,
+    "probability": 0.4183315634727478,
+    "max_reflectivity": 0.4882352948188782,
+    "max_qpe": 0.009999999776482582,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_22.png"
+  },
+  {
+    "index": 24,
+    "label": 0,
+    "probability": 0.4822593033313751,
+    "max_reflectivity": 0.42941176891326904,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_24.png"
+  },
+  {
+    "index": 61,
+    "label": 0,
+    "probability": 0.4263320565223694,
+    "max_reflectivity": 0.38235294818878174,
+    "max_qpe": 0.017999999225139618,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_61.png"
+  },
+  {
+    "index": 72,
+    "label": 0,
+    "probability": 0.43663832545280457,
+    "max_reflectivity": 0.4529411792755127,
+    "max_qpe": 0.006000000052154064,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_72.png"
+  },
+  {
+    "index": 75,
+    "label": 0,
+    "probability": 0.568568229675293,
+    "max_reflectivity": 0.6117647290229797,
+    "max_qpe": 0.3059999942779541,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_75.png"
+  },
+  {
+    "index": 84,
+    "label": 0,
+    "probability": 0.530214786529541,
+    "max_reflectivity": 0.5823529362678528,
+    "max_qpe": 0.07000000029802322,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_84.png"
+  },
+  {
+    "index": 89,
+    "label": 0,
+    "probability": 0.5845400094985962,
+    "max_reflectivity": 0.6470588445663452,
+    "max_qpe": 0.3140000104904175,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_89.png"
+  },
+  {
+    "index": 91,
+    "label": 0,
+    "probability": 0.539267897605896,
+    "max_reflectivity": 0.5941176414489746,
+    "max_qpe": 0.10000000149011612,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_91.png"
+  },
+  {
+    "index": 92,
+    "label": 0,
+    "probability": 0.5760132074356079,
+    "max_reflectivity": 0.6117647290229797,
+    "max_qpe": 0.09800000488758087,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_92.png"
+  },
+  {
+    "index": 97,
+    "label": 0,
+    "probability": 0.39550521969795227,
+    "max_reflectivity": 0.3588235378265381,
+    "max_qpe": 0.0020000000949949026,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_97.png"
+  },
+  {
+    "index": 99,
+    "label": 0,
+    "probability": 0.3819126784801483,
+    "max_reflectivity": 0.44117647409439087,
+    "max_qpe": 0.03200000151991844,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_99.png"
+  },
+  {
+    "index": 101,
+    "label": 0,
+    "probability": 0.5382291078567505,
+    "max_reflectivity": 0.48235294222831726,
+    "max_qpe": 0.16600000858306885,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_101.png"
+  },
+  {
+    "index": 106,
+    "label": 0,
+    "probability": 0.45196571946144104,
+    "max_reflectivity": 0.5764706134796143,
+    "max_qpe": 0.03799999877810478,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_106.png"
+  },
+  {
+    "index": 107,
+    "label": 0,
+    "probability": 0.39317891001701355,
+    "max_reflectivity": 0.3529411852359772,
+    "max_qpe": 0.0,
+    "max_shear": 1.0,
+    "category": "Convective Activity",
+    "image_file": "assets/mrms_gallery/sample_107.png"
+  },
+  {
+    "index": 109,
+    "label": 0,
+    "probability": 0.5169007778167725,
+    "max_reflectivity": 0.5470588207244873,
+    "max_qpe": 0.03999999910593033,
+    "max_shear": 1.0,
+    "category": "Severe Storm",
+    "image_file": "assets/mrms_gallery/sample_109.png"
+  },
+  {
+    "index": 1,
+    "label": 0,
+    "probability": 0.37224599719047546,
+    "max_reflectivity": 0.0470588244497776,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_1.png"
+  },
+  {
+    "index": 2,
+    "label": 0,
+    "probability": 0.37206754088401794,
+    "max_reflectivity": 0.0470588244497776,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_2.png"
+  },
+  {
+    "index": 10,
+    "label": 0,
+    "probability": 0.3720499277114868,
+    "max_reflectivity": 0.029411764815449715,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_10.png"
+  },
+  {
+    "index": 15,
+    "label": 0,
+    "probability": 0.3722241520881653,
+    "max_reflectivity": 0.1352941244840622,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_15.png"
+  },
+  {
+    "index": 16,
+    "label": 0,
+    "probability": 0.3723570704460144,
+    "max_reflectivity": 0.03529411926865578,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_16.png"
+  },
+  {
+    "index": 18,
+    "label": 0,
+    "probability": 0.3720560073852539,
+    "max_reflectivity": 0.03529411926865578,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_18.png"
+  },
+  {
+    "index": 27,
+    "label": 0,
+    "probability": 0.3728845417499542,
+    "max_reflectivity": 0.08235294371843338,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_27.png"
+  },
+  {
+    "index": 32,
+    "label": 0,
+    "probability": 0.3725059926509857,
+    "max_reflectivity": 0.1411764770746231,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_32.png"
+  },
+  {
+    "index": 33,
+    "label": 0,
+    "probability": 0.3722054362297058,
+    "max_reflectivity": 0.06470588594675064,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_33.png"
+  },
+  {
+    "index": 35,
+    "label": 0,
+    "probability": 0.3722117841243744,
+    "max_reflectivity": 0.0470588244497776,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_35.png"
+  },
+  {
+    "index": 53,
+    "label": 0,
+    "probability": 0.3722445070743561,
+    "max_reflectivity": 0.07647059112787247,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_53.png"
+  },
+  {
+    "index": 95,
+    "label": 0,
+    "probability": 0.3773074746131897,
+    "max_reflectivity": 0.12352941185235977,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Light Rain",
+    "image_file": "assets/mrms_gallery/sample_95.png"
+  },
+  {
+    "index": 0,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_0.png"
+  },
+  {
+    "index": 3,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_3.png"
+  },
+  {
+    "index": 4,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_4.png"
+  },
+  {
+    "index": 5,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_5.png"
+  },
+  {
+    "index": 8,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_8.png"
+  },
+  {
+    "index": 9,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_9.png"
+  },
+  {
+    "index": 11,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_11.png"
+  },
+  {
+    "index": 13,
+    "label": 0,
+    "probability": 0.3719918727874756,
+    "max_reflectivity": 0.0,
+    "max_qpe": 0.0,
+    "max_shear": 0.5,
+    "category": "Clear Sky",
+    "image_file": "assets/mrms_gallery/sample_13.png"
+  }
+]

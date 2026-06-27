@@ -7,6 +7,8 @@ References:
   via Gradient-based Localization. ICCV. https://arxiv.org/abs/1610.02391
 """
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow warnings/infos
 import numpy as np
 import tensorflow as tf
 import cv2
@@ -31,7 +33,7 @@ def make_gradcam_heatmap(
     )
 
     with tf.GradientTape() as tape:
-        conv_outputs, predictions = grad_model(img_array)
+        conv_outputs, predictions = grad_model([img_array])
         if pred_index is None:
             pred_index = int(tf.argmax(predictions[0]))
         class_score = predictions[:, pred_index]

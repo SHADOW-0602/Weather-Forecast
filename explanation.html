@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroClim: Architecture & Scientific Formulations</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for Interactive Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- MathJax for rendering math formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface-color: #1f2833;
+            --surface-accent: rgba(31, 40, 51, 0.6);
+            --primary: #66fcf1;
+            --secondary: #45f3ff;
+            --accent: #ff007f;
+            --text-main: #c5a880; /* Styled golden/sand text */
+            --text-light: #ffffff;
+            --text-muted: #8d99ae;
+            --glass-bg: rgba(15, 23, 42, 0.4);
+            --glass-border: rgba(102, 252, 241, 0.2);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.05) 0px, transparent 50%);
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background-color: rgba(11, 12, 16, 0.95);
+            border-right: 1px solid var(--glass-border);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-section i {
+            font-size: 2.2rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+        }
+
+        .logo-section h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item a:hover, .nav-item.active a {
+            background-color: var(--surface-accent);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            padding-left: 1.2rem;
+        }
+
+        .sidebar-footer {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 1rem;
+        }
+
+        /* Main Content Panel */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 3rem;
+            max-width: 1200px;
+        }
+
+        /* Header Area */
+        .section-header {
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .section-header::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-top: 1rem;
+        }
+
+        /* Card System */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(102, 252, 241, 0.1);
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            margin-bottom: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            color: #d1d5db;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* Formula System */
+        .formula-container {
+            background: rgba(11, 12, 16, 0.7);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 0 12px 12px 0;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .formula-legend {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 0.5rem;
+        }
+
+        /* Diagram Grid */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        /* Interactive Simulation Calculator */
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .slider-header span:first-child {
+            color: var(--text-light);
+        }
+
+        .slider-header span:last-child {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--surface-color);
+            border-radius: 3px;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .sim-results {
+            background: rgba(11, 12, 16, 0.8);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed var(--glass-border);
+            text-align: center;
+        }
+
+        /* Dynamic Speedometer CSS representation */
+        .gauge-wrap {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .gauge-bg {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 18px solid var(--surface-color);
+            box-sizing: border-box;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 18px solid transparent;
+            border-top-color: var(--primary);
+            border-right-color: var(--primary);
+            box-sizing: border-box;
+            transform: rotate(-45deg);
+            transition: transform 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+
+        .gauge-needle {
+            position: absolute;
+            width: 4px;
+            height: 90px;
+            background: var(--accent);
+            bottom: 0;
+            left: 98px;
+            transform-origin: bottom center;
+            transform: rotate(-90deg);
+            transition: transform 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .gauge-center-cap {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--text-light);
+            border-radius: 50%;
+            bottom: -8px;
+            left: 92px;
+            border: 3px solid var(--bg-color);
+        }
+
+        .gauge-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-top: 10px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .gauge-status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .alert-low { color: #10b981; }
+        .alert-mod { color: #f59e0b; }
+        .alert-sev { color: #f97316; }
+        .alert-ext { color: #ef4444; }
+
+        /* Grid for Multi-columns */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .feature-box {
+            background: rgba(255,255,255,0.02);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .feature-box h4 {
+            color: var(--secondary);
+            margin-bottom: 0.8rem;
+            font-size: 1.15rem;
+        }
+
+        /* SVG flow chart styles */
+        .flow-node {
+            fill: var(--surface-color);
+            stroke: var(--glass-border);
+            stroke-width: 2px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .flow-node:hover {
+            fill: var(--surface-accent);
+            stroke: var(--primary);
+            filter: drop-shadow(0 0 6px rgba(102, 252, 241, 0.4));
+        }
+
+        .flow-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            fill: var(--text-light);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .flow-arrow {
+            stroke: var(--text-muted);
+            stroke-width: 2px;
+            fill: none;
+            marker-end: url(#arrow);
+            stroke-dasharray: 4;
+            animation: dash 10s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -100;
+            }
+        }
+
+        /* Tab panels responsive styling */
+        @media (max-width: 968px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: fixed;
+                top: 0;
+                left: 0;
+                padding: 1rem 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                background-color: rgba(11, 12, 16, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                z-index: 1000;
+            }
+            .sidebar > div:first-child {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                justify-content: space-between;
+                gap: 20px;
+            }
+            .logo-section {
+                margin-bottom: 0;
+            }
+            .nav-menu {
+                flex-direction: row;
+                gap: 10px;
+            }
+            .nav-item a {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            .nav-item a:hover, .nav-item.active a {
+                border-left-color: transparent;
+                border-bottom-color: var(--primary);
+                padding-left: 0.8rem;
+            }
+            .sidebar-footer {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+                margin-top: 80px;
+                padding: 2rem 1.5rem;
+            }
+            .sim-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar > div:first-child {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .nav-menu {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+                flex-direction: row;
+                justify-content: flex-start;
+                scrollbar-width: none;
+            }
+            .nav-menu::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-item {
+                display: inline-block;
+            }
+            .main-content {
+                margin-top: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 1.5rem 1rem;
+            }
+            .glass-card {
+                padding: 1.5rem 1rem;
+            }
+            .section-header h2 {
+                font-size: 1.8rem;
+            }
+            h3 {
+                font-size: 1.3rem;
+            }
+            .gauge-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="logo-section">
+                <i class="fa-solid fa-cloud-bolt"></i>
+                <h1>AeroClim Docs</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active"><a href="#overview"><i class="fa-solid fa-compass"></i> Overview</a></li>
+                <li class="nav-item"><a href="#data"><i class="fa-solid fa-database"></i> Data Pipeline</a></li>
+                <li class="nav-item"><a href="#formulas"><i class="fa-solid fa-square-root-variable"></i> Science & Math</a></li>
+                <li class="nav-item"><a href="#models"><i class="fa-solid fa-network-wired"></i> ML Architecture</a></li>
+                <li class="nav-item"><a href="#gradcam"><i class="fa-solid fa-eye"></i> Grad-CAM Explain</a></li>
+                <li class="nav-item"><a href="#performance"><i class="fa-solid fa-chart-line"></i> Performance</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            <p style="margin:0; font-size:0.75rem;">AeroClim v1.4 - Research & Verification</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+        
+        <!-- SECTION 1: OVERVIEW -->
+        <section id="overview" class="section-header">
+            <h2>AeroClim Core Overview</h2>
+            <p>An interactive late-fusion research platform integrating station weather, atmospheric observations, ocean context, and land-surface moisture for one-day-ahead environmental modeling.</p>
+        </section>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-circle-nodes"></i> Scientific Foundation</h3>
+            <p>AeroClim combines daily observations from a reduced 20-station NOAA subset with NOAA GSOD atmospheric fields, basin-level sea-surface temperature context, ERA5-Land soil moisture, and large-scale climate indices. Its artifacts predict next-day average temperature and a prototype next-day hazard-state probability. The output is a research score, not an official warning or a long-range operational forecast.</p>
+            
+            <p><strong>MRMS 2D CNN:</strong> The current radar-image CNN uses 2,244 total MRMS chips and 2,129 time-window-labeled chips after excluding ambiguous near-event samples. Labels now use actual NOAA Storm Events begin/end timestamps with a 6-hour pre-event and 6-hour post-event positive window, plus a 12-hour ambiguity buffer. On the chronological 2024 test split, image-only results are accuracy 64.4%, F1 0.378, and AUC 0.600. The CNN+tabular point-9 fusion artifact improves the 2024 test results to accuracy 77.0%, F1 0.582, and AUC 0.853 by combining image evidence with station-weather/event-model probability.</p>
+
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-database"></i> 1. Dynamic Ingestion</h4>
+                    <p style="font-size:0.95rem;">Loads the 20-station NOAA subset and merges temperature, precipitation, dew point, wind, pressure, humidity, SST, climate indices, and ERA5-Land soil moisture by date.</p>
+                </div>
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-gears"></i> 2. Feature Coupling</h4>
+                    <p style="font-size:0.95rem;">Engineers coupled thermodynamic indicators (like Stull's Wet-Bulb, apparent Heat Index, wind chills, and rolling drought deficit indices) representing energy transfer.</p>
+                </div>
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-brain"></i> 3. Late Fusion Prediction</h4>
+                    <p style="font-size:0.95rem;">Merges a 30-day LSTM temperature forecast with a next-day Random Forest hazard probability through a Keras 3 meta-learner.</p>
+                </div>
+            </div>
+        </div>
+
+        <section id="data" class="section-header" style="margin-top:4rem;">
+            <h2>Observed & Reanalysis Data</h2>
+            <p>The provenance, coverage, and temporal alignment used by the current trained artifacts.</p>
+        </section>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-layer-group"></i> Current Multimodal Dataset</h3>
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h4>NOAA Station Weather</h4>
+                    <p style="font-size:0.92rem; margin:0;">20 U.S. stations with daily temperature and precipitation. The prepared archive spans 1954–2024; model training uses 1995–2024.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>NOAA Atmosphere</h4>
+                    <p style="font-size:0.92rem; margin:0;">GSOD daily dew point, wind, pressure, and derived relative humidity: 1,085,298 records across the station network.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>ERA5-Land Soil State</h4>
+                    <p style="font-size:0.92rem; margin:0;">Layer-1 and layer-2 volumetric soil water mapped to each station. Monthly reanalysis is interpolated daily, producing 1,095,800 complete records.</p>
+                </div>
+            </div>
+            <p style="margin-top:1.5rem;"><strong>Soil features:</strong> root-zone moisture is a depth-weighted combination of the 0–7 cm and 7–28 cm layers. Saturation percentage is each station’s historical percentile.</p>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-circle-nodes"></i> Auxiliary Global & Regional Climate Drivers</h3>
+            <p>
+                In addition to direct localized daily observations, AeroClim integrates three crucial auxiliary datasets to capture broader climate forcings, spatial context, and oceanic feedback loops. These macro-scale and static features are sourced independently because they represent variables outside the scope of simple in-situ daily station weather reports.
+            </p>
+            
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-water"></i> Ocean Temperatures (<code>ocean.csv</code>)</h4>
+                    <p style="font-size:0.92rem; margin:0; color:var(--text-muted);">
+                        Sourced from the Copernicus Marine Service. Contains regional Sea Surface Temperature (SST) anomalies across coastal zones and oceanic basins adjacent to the station network.
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-earth-americas"></i> Climate Teleconnections (<code>climate_indices.csv</code>)</h4>
+                    <p style="font-size:0.92rem; margin:0; color:var(--text-muted);">
+                        Sourced from the NOAA Climate Prediction Center (CPC). Tracks daily and monthly global indices including the El Niño-Southern Oscillation (ENSO), North Atlantic Oscillation (NAO), and Pacific Decadal Oscillation (PDO).
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4><i class="fa-solid fa-map-pin"></i> Station Registry (<code>station_locations.csv</code>)</h4>
+                    <p style="font-size:0.92rem; margin:0; color:var(--text-muted);">
+                        Contains static metadata for each NOAA station, including exact Latitude, Longitude, Elevation (m), and its mapping to a regional climate/weather basin (e.g., Northwest, Northeast, Southeast).
+                    </p>
+                </div>
+            </div>
+
+            <h4 style="color:var(--secondary); margin-top:2rem; margin-bottom:0.8rem; font-size:1.2rem;">
+                <i class="fa-solid fa-lightbulb"></i> Scientific & Architectural Coupling Benefits
+            </h4>
+            <p style="font-size:0.95rem; margin-bottom:1rem;">
+                Integrating and cross-referencing these datasets provides significant advantages for both machine learning accuracy and database architecture:
+            </p>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; margin-left: 10px; margin-bottom: 1.5rem;">
+                <li style="display: flex; gap: 12px; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-check" style="color: var(--primary); margin-top: 4px;"></i>
+                    <span><strong>Ocean-Atmosphere Coupling:</strong> Micro-climate forecasts are heavily influenced by macro-climatology. Anomalies in Sea Surface Temperatures (SST) and indices like ENSO govern storm tracks, precipitation patterns, and heatwaves with a known physical lag time (e.g., 2–4 weeks), which enhances predictive signal strength.</span>
+                </li>
+                <li style="display: flex; gap: 12px; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-check" style="color: var(--primary); margin-top: 4px;"></i>
+                    <span><strong>Geographical Generalization:</strong> Station coordinates and regional weather basins allow the ML models to generalize regional micro-climates and elevation gradients, reducing localized curve-fitting and improving model resilience.</span>
+                </li>
+                <li style="display: flex; gap: 12px; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-check" style="color: var(--primary); margin-top: 4px;"></i>
+                    <span><strong>Database Normalization & Efficiency:</strong> Storing global daily climate indices and static coordinates in dedicated, normalized CSV tables prevents duplication across millions of records in the core station weather timeseries. This modular architecture minimizes database size, improves ingestion speeds, and facilitates independent updates.</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- SECTION 2: FORMULAS -->
+        <section id="formulas" class="section-header" style="margin-top:4rem;">
+            <h2>Climatological Formulations</h2>
+            <p>Mathematical expressions used inside the feature engineering block of AeroClim to couple environmental observations.</p>
+        </section>
+
+        <!-- Interactive Scientific Formula Sandbox -->
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-calculator"></i> Interactive Thermodynamic Calculator</h3>
+            <p>Drag the sliders below to explore the engineering formulas. The gauge is an educational heuristic and is not the trained model’s probability output.</p>
+            
+            <div class="sim-grid">
+                <div class="sim-controls">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Air Temperature (T)</span>
+                            <span id="val-t">25.0 °C</span>
+                        </div>
+                        <input type="range" id="input-t" min="-15" max="45" value="25" step="0.5">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Dew Point (D)</span>
+                            <span id="val-d">16.0 °C</span>
+                        </div>
+                        <input type="range" id="input-d" min="-20" max="30" value="16" step="0.5">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Wind Speed (W)</span>
+                            <span id="val-w">15.0 km/h</span>
+                        </div>
+                        <input type="range" id="input-w" min="0" max="110" value="15" step="1">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Today's Rainfall (P)</span>
+                            <span id="val-p">8.0 mm</span>
+                        </div>
+                        <input type="range" id="input-p" min="0" max="100" value="8" step="1">
+                    </div>
+                </div>
+                
+                <div class="sim-results">
+                    <div class="gauge-wrap">
+                        <div class="gauge-bg"></div>
+                        <div class="gauge-fill" id="gauge-fill"></div>
+                        <div class="gauge-needle" id="gauge-needle"></div>
+                        <div class="gauge-center-cap"></div>
+                    </div>
+                    <div class="gauge-value" id="risk-pct">35.0%</div>
+                    <div class="gauge-status alert-mod" id="risk-cat">Moderate Alert</div>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);" id="sim-details">
+                        Heat Index: 26.1°C | Wet Bulb: 19.5°C | Wind Chill: 25.8°C
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-temperature-three-quarters"></i> 1. Apparent Heat Index (Apparent Temp)</h3>
+            <p>Calculates the humiture, or the relative temperature felt by the human body when combining air temperature with moisture (represented by dew point):</p>
+            <div class="formula-container">
+                $$HI = -8.78469476 + 1.61139411 \cdot T + 2.33854884 \cdot D - 0.14611605 \cdot T \cdot D$$
+                $$- 0.01230809 \cdot T^2 - 0.01642483 \cdot D^2 + 0.00221173 \cdot T^2 \cdot D + 0.00072546 \cdot T \cdot D^2 - 0.00000358 \cdot T^2 \cdot D^2$$
+                <div class="formula-legend">
+                    <strong>Legend:</strong> T = Air Temperature (°C) | D = Dew Point (°C) | HI = Heat Index (°C)
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-wind"></i> 2. Wind Chill (Perceived Cold)</h3>
+            <p>Calculates the perceived cold temperature felt on exposed skin due to air flow convection rates at wind speed values:</p>
+            <div class="formula-container">
+                $$WC = 13.12 + 0.6215 \cdot T - 11.37 \cdot W^{0.16} + 0.3965 \cdot T \cdot W^{0.16}$$
+                <div class="formula-legend">
+                    <strong>Legend:</strong> T = Air Temperature (°C) | W = Wind Speed (km/h) | WC = Wind Chill (°C)
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-droplet"></i> 3. Thermodynamic Wet-Bulb Temperature (Stull's Equation)</h3>
+            <p>Evaluates the cooling limit of evaporating water in air. Calculated using the highly accurate empirical formula developed by Dr. Roland Stull:</p>
+            <div class="formula-container">
+                $$T_{WB} = T \cdot \arctan\left(0.151977 \cdot (D + 8.313659)^{0.5}\right) + \arctan(T + D) - \arctan(D - 1.676331)$$
+                $$+ 0.00391838 \cdot D^{1.5} \cdot \arctan(0.023101 \cdot D) - 4.686035$$
+                <div class="formula-legend">
+                    <strong>Legend:</strong> T = Air Temperature (°C) | D = Dew Point (°C) | T_WB = Wet-Bulb Temp (°C)
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-shield-halved"></i> 4. Combined Risk Indices</h3>
+            <p>Calculated dynamic features represent coupled indicators representing flood risks, soil moisture anomalies, and local temperature anomalies:</p>
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h4>Flood Risk Index</h4>
+                    <div style="font-size: 1.15rem; margin: 15px 0; color: var(--primary); text-align: center; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
+                        \( I_{\text{Flood}} = P \cdot \left(\frac{S}{100}\right) \)
+                    </div>
+                    <p style="font-size:0.9rem; margin:0; color:var(--text-muted);">
+                        Couples daily precipitation \( (P) \) with the ERA5-Land station-relative soil saturation percentile \( (S) \).
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4>Drought Index</h4>
+                    <div style="font-size: 1.15rem; margin: 15px 0; color: var(--primary); text-align: center; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
+                        \( I_{\text{Drought}} = \max(0, \mu_{P} - P_{30}) \)
+                    </div>
+                    <p style="font-size:0.9rem; margin:0; color:var(--text-muted);">
+                        Quantifies the rolling 30-day precipitation deficit \( (P_{30}) \) against historical mean \( (\mu_P) \).
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4>Ocean Thermal Gradient</h4>
+                    <div style="font-size: 1.15rem; margin: 15px 0; color: var(--primary); text-align: center; overflow-x: auto; white-space: nowrap; padding-bottom: 5px;">
+                        \( \Delta T = T_{\text{Air}} - T_{\text{SST}} \)
+                    </div>
+                    <p style="font-size:0.9rem; margin:0; color:var(--text-muted);">
+                        Measures the gradient between average land air temperature \( (T_{\text{Air}}) \) and Sea Surface Temperature \( (T_{\text{SST}}) \).
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: ML ARCHITECTURE -->
+        <section id="models" class="section-header" style="margin-top:4rem;">
+            <h2>Machine Learning Pipeline</h2>
+            <p>The neural network and statistical learning architecture used by AeroClim to fuse multimodal forecasts.</p>
+        </section>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-sitemap"></i> Multimodal Late Fusion Flowchart</h3>
+            <p>The system separates sequential temperature forecasting from tabular next-day hazard classification. Fusion is trained only on validation-period branch predictions; the 2022–2024 test period remains untouched until final evaluation.</p>
+            
+            <div class="diagram-container">
+                <!-- Inline SVG Diagram -->
+                <svg viewBox="0 0 650 300" style="width: 100%; height: auto; max-width: 650px;">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#8d99ae" />
+                        </marker>
+                    </defs>
+                    
+                    <!-- Left Inputs -->
+                    <rect x="20" y="40" width="130" height="60" rx="6" class="flow-node" />
+                    <text x="35" y="75" class="flow-text">30-Day Sequence</text>
+                    
+                    <rect x="20" y="200" width="130" height="60" rx="6" class="flow-node" />
+                    <text x="35" y="235" class="flow-text">Tabular Features</text>
+                    
+                    <!-- Connections to models -->
+                    <path d="M 150 70 L 220 70" class="flow-arrow" />
+                    <path d="M 150 230 L 220 230" class="flow-arrow" />
+                    
+                    <!-- Models -->
+                    <rect x="220" y="30" width="140" height="80" rx="8" class="flow-node" />
+                    <text x="250" y="65" class="flow-text" style="fill: var(--primary);">LSTM Model</text>
+                    <text x="235" y="85" class="flow-text" style="font-size: 10px; font-weight:normal;">Predicts Temp Trend</text>
+                    
+                    <rect x="220" y="190" width="140" height="80" rx="8" class="flow-node" />
+                    <text x="240" y="225" class="flow-text" style="fill: var(--primary);">Random Forest</text>
+                    <text x="235" y="245" class="flow-text" style="font-size: 10px; font-weight:normal;">Classifies Risk Prob</text>
+                    
+                    <!-- Predictions going to Late Fusion -->
+                    <path d="M 360 70 L 410 70 L 440 120" class="flow-arrow" />
+                    <path d="M 360 230 L 410 230 L 440 175" class="flow-arrow" />
+                    
+                    <!-- Late Fusion Meta-Learner -->
+                    <rect x="440" y="110" width="160" height="70" rx="8" class="flow-node" style="stroke: var(--accent);" />
+                    <text x="460" y="140" class="flow-text" style="fill: var(--accent);">Late Fusion DNN</text>
+                    <text x="455" y="160" class="flow-text" style="font-size: 10px; font-weight:normal;">Dense Feed-Forward</text>
+                    
+                    <!-- Output -->
+                    <path d="M 600 145 L 630 145" class="flow-arrow" />
+                    
+                    <!-- Endpoint indicator -->
+                    <circle cx="635" cy="145" r="5" fill="var(--accent)" />
+                </svg>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-arrows-split-up-and-left"></i> Architecture Description</h3>
+            <p><strong>1. Long Short-Term Memory (LSTM) Network:</strong></p>
+            <p style="margin-left: 20px; font-size: 0.95rem;">
+                Ingests historical weather sequences to forecast tomorrow's land temperatures. Consists of a 64-unit LSTM layer, a 20% Dropout regularization block, a 32-unit LSTM layer, another 20% Dropout block, and a Dense linear output unit.
+            </p>
+            <p><strong>2. Random Forest Classifier:</strong></p>
+            <p style="margin-left: 20px; font-size: 0.95rem;">
+                Evaluates today’s thirty-six environmental predictors and estimates the following day’s hazard state. The feature set now includes lagged rain/wind/pressure/soil history plus atmospheric/soil/climate quality flags such as imputed-atmosphere and observed-soil indicators. The current fast-refresh artifact uses 60 trees, maximum depth 10, balanced class weights, and parallel RF fitting; the heavier research command can use 100 trees.
+            </p>
+            <p><strong>3. Late Fusion Meta-Learner:</strong></p>
+            <p style="margin-left: 20px; font-size: 0.95rem;">
+                Concatenates predictions into a unified feature vector: `[Forecasted_TAVG, RF_Probability]`. This vector is processed by a Dense layer of 16 ReLU units, a Dense layer of 8 ReLU units, and a final Sigmoid activation output layer representing the coupled hazard probability.
+            </p>
+            <p><strong>Chronological evaluation:</strong> training uses 1995–2018, validation/fusion training uses 2019–2021, and final testing uses 2022–2024. NOAA Storm Events labels now provide an independent event/no-event target during the covered 2022–2024 test window; outside that coverage, the system falls back to the engineered next-day hazard proxy. A separate NOAA event model trains on 2022, tunes its threshold on 2023, and evaluates on 2024. Current neural artifacts use the Keras 3 <code>.keras</code> format and reload successfully under TensorFlow 2.21.</p>
+        </div>
+
+        <!-- SECTION 4: GRAD-CAM -->
+        <section id="gradcam" class="section-header" style="margin-top:4rem;">
+            <h2>CNN Grad-CAM Visualizations</h2>
+            <p>Explaining convolutional neural network activations on precipitation reflectivity grids.</p>
+        </section>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-map-location-dot"></i> Spatial Attributions via Gradient Localization</h3>
+            <p>AeroClim now includes a working <strong>MRMS 2D CNN radar-image pipeline</strong> plus a <strong>Gradient-weighted Class Activation Map (Grad-CAM)</strong> utility. The trained CNN reads station-centered 64Ã—64 image chips built from NOAA MRMS radar products and estimates NOAA Storm Events probability. The dashboard still keeps the synthetic demo as a fallback, but the primary radar tab can now render real MRMS samples and CNN activations when the saved artifacts are present.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-box">
+                    <h4>Step 1: MRMS Image Chip</h4>
+                    <p style="font-size:0.92rem; margin:0;">
+                        Each sample stacks reflectivity composite, one-hour radar QPE, and 0â€“2 km azimuthal shear into a three-channel CNN input.
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4>Step 2: Gradient Saliency</h4>
+                    <p style="font-size:0.92rem; margin:0;">
+                        The system computes gradients of the target risk score w.r.t. the last feature activation maps.
+                    </p>
+                </div>
+                <div class="feature-box">
+                    <h4>Step 3: Weighted Overlay</h4>
+                    <p style="font-size:0.92rem; margin:0;">
+                        The gradients are global-average-pooled and blended with the MRMS chip to show which spatial regions influenced the event score.
+                    </p>
+                </div>
+            </div>
+            <p style="margin-top: 1rem;"><strong>Point-9 fusion artifact:</strong> A separate logistic fusion model now combines the MRMS CNN event probability with the NOAA tabular event-model probability. This keeps the image model interpretable while allowing station weather features to correct weak image-only cases.</p>
+        </div>
+
+        <!-- SECTION 5: PERFORMANCE -->
+        <section id="performance" class="section-header" style="margin-top:4rem;">
+            <h2>Model Performance & Metrics</h2>
+            <p>Interactive verification stats and global feature importances for the trained models.</p>
+        </section>
+
+        <!-- Interactive Charts Grid -->
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-chart-bar"></i> Global Feature Importance (Gini Index)</h3>
+            <p>Measured Gini importances from the current pooled 20-station Random Forest. Importance indicates split usage, not causality. Hover over the bars to see individual values.</p>
+            <div style="position: relative; height: 350px; width: 100%;">
+                <canvas id="importanceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fa-solid fa-square-poll-vertical"></i> Multimodal Validation Metrics</h3>
+            <p>Final scores from the fast-refresh pooled 20-station model. The broad fusion/RF hazard model is evaluated on the 2022–2024 hybrid target, while the separate NOAA event model is trained on 2022 event-coverage rows, threshold-tuned on 2023, and tested on 2024:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-box" style="text-align: center; border-color: rgba(102, 252, 241, 0.4);">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Meta-Learner Fusion</span>
+                    <h3 style="font-size: 2.8rem; justify-content: center; margin-top: 5px; color: var(--primary);">62.8%</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Hybrid Test Accuracy · AUC 0.520</p>
+                </div>
+                <div class="feature-box" style="text-align: center;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Random Forest</span>
+                    <h3 style="font-size: 2.8rem; justify-content: center; margin-top: 5px; color: var(--text-light);">62.5%</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Hybrid Test Accuracy · AUC 0.522</p>
+                </div>
+                <div class="feature-box" style="text-align: center;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">LSTM Next-Day Temperature</span>
+                    <h3 style="font-size: 2.8rem; justify-content: center; margin-top: 5px; color: var(--accent);">2.12°C</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">MAE · RMSE 2.84°C · R² 0.927</p>
+                </div>
+                <div class="feature-box" style="text-align: center; border-color: rgba(245, 158, 11, 0.45);">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase;">Separate NOAA Event Model</span>
+                    <h3 style="font-size: 2.8rem; justify-content: center; margin-top: 5px; color: var(--warning);">0.878</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">2024 Event AUC · F1 0.471 · Recall 0.557</p>
+                </div>
+            </div>
+            <p style="margin-top:1.5rem; color:var(--text-muted);"><strong>Forecast boundary:</strong> these artifacts predict one day ahead. Roughly 10 years of daily history is the practical minimum and 20+ years is preferred. Forecasts beyond 7–14 days require numerical-weather ensembles; monthly outlooks require seasonal ensemble models.</p>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // Navigation active toggle
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // ----------------------------------------------------
+    // INTERACTIVE CALCULATOR CODE
+    // ----------------------------------------------------
+    const tInput = document.getElementById('input-t');
+    const dInput = document.getElementById('input-d');
+    const wInput = document.getElementById('input-w');
+    const pInput = document.getElementById('input-p');
+
+    const tVal = document.getElementById('val-t');
+    const dVal = document.getElementById('val-d');
+    const wVal = document.getElementById('val-w');
+    const pVal = document.getElementById('val-p');
+
+    const riskPct = document.getElementById('risk-pct');
+    const riskCat = document.getElementById('risk-cat');
+    const simDetails = document.getElementById('sim-details');
+    const needle = document.getElementById('gauge-needle');
+    const fill = document.getElementById('gauge-fill');
+
+    function calculateRisk() {
+        const T = parseFloat(tInput.value);
+        const D = parseFloat(dInput.value);
+        const W = parseFloat(wInput.value);
+        const P = parseFloat(pInput.value);
+
+        // Update displays
+        tVal.innerText = T.toFixed(1) + " °C";
+        dVal.innerText = D.toFixed(1) + " °C";
+        wVal.innerText = W.toFixed(1) + " km/h";
+        pVal.innerText = P.toFixed(1) + " mm";
+
+        // 1. Calculate Heat Index (Celsius approximation)
+        let heatIdx = -8.78469476 + 1.61139411*T + 2.33854884*D - 0.14611605*T*D 
+                      - 0.01230809*T*T - 0.01642483*D*D + 0.00221173*T*T*D 
+                      + 0.00072546*T*D*D - 0.00000358*T*T*D*D;
+
+        // 2. Calculate Wind Chill
+        let windChill = T;
+        if (T < 10 && W > 4.8) {
+            windChill = 13.12 + 0.6215*T - 11.37*Math.pow(W, 0.16) + 0.3965*T*Math.pow(W, 0.16);
+        }
+
+        // 3. Calculate Stull's Wet Bulb
+        let wetBulb = T * Math.atan(0.151977 * Math.sqrt(D + 8.313659)) 
+                      + Math.atan(T + D) - Math.atan(D - 1.676331) 
+                      + 0.00391838 * Math.pow(Math.max(D, 0), 1.5) * Math.atan(0.023101 * D) 
+                      - 4.686035;
+
+        // 4. Calculate educational risk heuristic (not the trained model)
+        let risk = 10; // base risk
+        if (T > 32) risk += (T - 32) * 5; // heat risk
+        if (wetBulb > 22) risk += (wetBulb - 22) * 8; // humidity stress
+        if (P > 0) risk += P * 3.5; // rainfall accumulation risk
+        if (W > 30) risk += (W - 30) * 1.5; // wind damage risk
+
+        // Clamp risk between 0 and 100
+        risk = Math.min(Math.max(risk, 5), 100);
+
+        // Update displays
+        riskPct.innerText = risk.toFixed(1) + "%";
+        simDetails.innerText = "Heat Index: " + heatIdx.toFixed(1) + "°C | Wet Bulb: " + wetBulb.toFixed(1) + "°C | Wind Chill: " + windChill.toFixed(1) + "°C";
+
+        // Gauge animations
+        const rotDegrees = -90 + (risk / 100) * 180;
+        needle.style.transform = `rotate(${rotDegrees}deg)`;
+        
+        // Gauge fill rotation
+        const fillDegrees = -45 + (risk / 100) * 180;
+        fill.style.transform = `rotate(${fillDegrees}deg)`;
+
+        // Status Categories
+        riskCat.className = "gauge-status";
+        if (risk < 30) {
+            riskCat.innerText = "Low Risk";
+            riskCat.classList.add("alert-low");
+            fill.style.borderTopColor = "#10b981";
+            fill.style.borderRightColor = "#10b981";
+        } else if (risk < 60) {
+            riskCat.innerText = "Moderate Alert";
+            riskCat.classList.add("alert-mod");
+            fill.style.borderTopColor = "#f59e0b";
+            fill.style.borderRightColor = "#f59e0b";
+        } else if (risk < 85) {
+            riskCat.innerText = "Severe Warning";
+            riskCat.classList.add("alert-sev");
+            fill.style.borderTopColor = "#f97316";
+            fill.style.borderRightColor = "#f97316";
+        } else {
+            riskCat.innerText = "Extreme Danger";
+            riskCat.classList.add("alert-ext");
+            fill.style.borderTopColor = "#ef4444";
+            fill.style.borderRightColor = "#ef4444";
+        }
+    }
+
+    // Attach event listeners
+    [tInput, dInput, wInput, pInput].forEach(slider => {
+        slider.addEventListener('input', calculateRisk);
+    });
+
+    // Run initial calculation
+    calculateRisk();
+
+    // ----------------------------------------------------
+    // CHART.JS: FEATURE IMPORTANCE
+    // ----------------------------------------------------
+    const ctx = document.getElementById('importanceChart').getContext('2d');
+    
+    // Gradient for chart bars
+    const gradient = ctx.createLinearGradient(0, 0, 400, 0);
+    gradient.addColorStop(0, '#1f2833');
+    gradient.addColorStop(1, '#66fcf1');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [
+                'DROUGHT_IDX', 'PRCP_ANOM', 'LONGITUDE', 'FLOOD_RISK_IDX',
+                'TEMP_ANOM', 'EXTREME_HEAT', 'SATURATION_PCT', 'ELEVATION',
+                'HUMIDITY_PCT', 'LATITUDE'
+            ],
+            datasets: [{
+                label: 'Gini Importance Weight',
+                data: [0.4579, 0.2230, 0.0381, 0.0304, 0.0262, 0.0253, 0.0241, 0.0226, 0.0216, 0.0210],
+                backgroundColor: gradient,
+                borderColor: '#66fcf1',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(255,255,255,0.05)'
+                    },
+                    ticks: {
+                        color: '#8d99ae'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#ffffff',
+                        font: {
+                            family: 'Plus Jakarta Sans',
+                            size: 11,
+                            weight: '600'
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

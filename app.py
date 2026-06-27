@@ -1,6 +1,7 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow warnings
 import datetime
+import json
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -35,6 +36,20 @@ def load_resources():
 
 noaa_client, predictor = load_resources()
 
+@st.cache_data
+def load_data_health():
+    path = "data/data_health.json"
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        report = json.load(handle)
+    return {
+        row["station_id"]: row
+        for row in report.get("stations", [])
+    }
+
+data_health = load_data_health()
+
 # ----------------------------------------------------
 # SIDEBAR CONTROL LAYOUT
 # ----------------------------------------------------
@@ -52,6 +67,7 @@ with st.sidebar:
     )
     
     city_data = CITIES[selected_city_id]
+    station_health = data_health.get(selected_city_id, {})
     
     # Render station parameters
     st.info(f"""
@@ -61,6 +77,12 @@ with st.sidebar:
     - **Elevation:** {city_data["elevation"]} m
     - **Coordinates:** {city_data["lat"]}° N, {abs(city_data["lon"])}° W
     """)
+    if station_health and not station_health.get("training_ready", True):
+        st.warning(
+            "This station has substantial atmospheric gaps "
+            f"({station_health.get('core_completeness_pct', 0):.1f}% core completeness). "
+            "Use predictions cautiously or repair its GSOD mapping."
+        )
     
     # Temporal Window Presets
     st.subheader("Temporal Window")
@@ -90,7 +112,7 @@ st.title("AeroClim Analytics Dashboard")
 st.markdown("An interactive platform evaluating weather anomalies, sea surface temperature dynamics, and machine learning models to assess hazards and predict extreme environmental risk indices.")
 
 tab_live, tab_sst, tab_ml, tab_radar, tab_data = st.tabs([
-    " Live NOAA Station Data",
+    " NOAA Station Archive",
     " Sea Surface Temperature",
     " Flash Flood & Hazard Predictor",
     " Radar Heatmap & CNN Activations",
@@ -98,7 +120,7 @@ tab_live, tab_sst, tab_ml, tab_radar, tab_data = st.tabs([
 ])
 
 # Fetch data globally to share between tabs
-with st.spinner("Syncing with meteorological network..."):
+with st.spinner("Loading prepared meteorological records..."):
     weather_df = noaa_client.fetch_weather_data(
         selected_city_id, 
         start_date.strftime("%Y-%m-%d"), 
@@ -207,6 +229,13 @@ with tab_sst:
             "KMDW": "sst_atlantic_f",
         }
         target_col = basin_mapping.get(selected_city_id)
+        if target_col is None:
+            if city_data["lon"] <= -100:
+                target_col = "sst_pacific_f"
+            elif city_data["lat"] <= 31.5 and city_data["lon"] <= -80:
+                target_col = "sst_gulf_f"
+            else:
+                target_col = "sst_atlantic_f"
         if target_col and target_col in sst_df.columns:
             sst_df["SST_Mean_Celsius"] = (sst_df[target_col] - 32) * 5.0 / 9.0
         else:
@@ -236,7 +265,8 @@ with tab_sst:
 # TAB 3: EXTREME WEATHER & FLOOD RISK PREDICTOR
 # ----------------------------------------------------
 with tab_ml:
-    st.header("Operational Flash Flood & Extreme Hazard Forecast Predictor")
+    st.header("Prototype Next-Day Environmental Hazard Predictor")
+    st.caption("Research output only — not an official weather warning or emergency product.")
     
     col_inputs, col_results = st.columns(2)
     
@@ -250,6 +280,11 @@ with tab_ml:
         
         if predictor.rf_model is None:
             st.warning("Multimodal models are not trained yet. Train them below.")
+        elif predictor.lstm_model is None or predictor.fusion_model is None:
+            st.warning(
+                "Only the Random Forest artifact is currently usable. "
+                "Retrain on the full archive to restore LSTM and fusion output."
+            )
             
         if st.button("Train Models (30 Years of Daily Coupled Data)", width="stretch"):
             progress_bar = st.progress(0)
@@ -259,7 +294,7 @@ with tab_ml:
                 status_text.text(msg)
             
             try:
-                train_start = today - datetime.timedelta(days=11000)
+                train_start = datetime.date(1995, 1, 1)
                 train_df = noaa_client.fetch_weather_data(
                     selected_city_id, train_start.strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d"), force_simulation=force_sim
                 )
@@ -276,6 +311,19 @@ with tab_ml:
             col_m1.metric("Meta-Learner Fusion", f"{metrics.get('fusion_accuracy', 0.0)*100.0:.1f}%")
             col_m2.metric("Random Forest", f"{metrics.get('rf_accuracy', 0.0)*100.0:.1f}%")
             col_m3.metric("LSTM R² Score", f"{metrics.get('lstm_r2', 0.0):.3f}")
+            if metrics.get("event_labeled_test_rows", 0):
+                st.caption(
+                    "Independent NOAA Storm Events check: "
+                    f"{metrics.get('event_labeled_test_rows', 0):,} labeled test rows, "
+                    f"RF event AUC {metrics.get('rf_event_auc', 0.5):.3f}."
+                )
+            if metrics.get("event_model_trained"):
+                st.caption(
+                    "Separate NOAA event model: "
+                    f"F1 {metrics.get('event_model_test_f1', 0.0):.3f}, "
+                    f"recall {metrics.get('event_model_test_recall', 0.0):.3f}, "
+                    f"threshold {metrics.get('event_model_threshold', 0.5)*100.0:.1f}%."
+                )
 
     prediction = predictor.predict(
         weather_df=weather_df, current_tmax=current_tmax, current_tmin=current_tmin,
@@ -325,19 +373,29 @@ with tab_ml:
             st.error(f"**{severity}**: {desc}")
             
         st.markdown(f"**Diagnostic Explanation:**\n{prediction['Explanation']}")
+        if prediction.get("Event_Prob") is not None:
+            st.metric(
+                "Separate NOAA Event Probability",
+                f"{prediction['Event_Prob']:.1f}%",
+                delta=(
+                    "above tuned threshold"
+                    if prediction.get("Event_Alert")
+                    else "below tuned threshold"
+                ),
+            )
 
     st.divider()
     
     col_feat, col_shap = st.columns(2)
     with col_feat:
-        st.subheader("Local Relative Feature Attributions (SHAP)")
+        st.subheader("Local Relative Contribution Heuristic")
         if "Contributions" in prediction:
             contrib_df = pd.DataFrame(list(prediction["Contributions"].items()), columns=["Factor", "Weight"])
             contrib_df = contrib_df.sort_values("Weight", ascending=True)
-            fig_contrib = px.bar(contrib_df, x="Weight", y="Factor", orientation="h", title="SHAP Feature Influences")
+            fig_contrib = px.bar(contrib_df, x="Weight", y="Factor", orientation="h", title="Relative Feature Contributions")
             st.plotly_chart(fig_contrib, width="stretch")
         else:
-            st.info("Feature attributions will display here when models are trained.")
+            st.info("Relative contribution estimates will display here when models are trained.")
             
     with col_shap:
         st.subheader("Global Feature Importance (Gini)")
@@ -353,7 +411,105 @@ with tab_ml:
 # ----------------------------------------------------
 with tab_radar:
     st.header("Precipitation Radar & CNN Activations (Seaborn Heatmaps)")
-    st.write("This tab visualizes the precipitation reflectivity grid (radar dBZ) and the Convolutional Neural Network (CNN) class activations (Grad-CAM) side-by-side using Seaborn heatmaps.")
+    st.write("This tab visualizes MRMS radar image chips and Convolutional Neural Network (CNN) class activations (Grad-CAM).")
+
+    st.subheader("Real MRMS CNN Sample")
+    try:
+        mrms_npz = "data/mrms_historical_images/mrms_live_chips.npz"
+        mrms_manifest = "data/mrms_historical_images/manifest.csv"
+        cnn_path = "saved_models/cnn_event_model.keras"
+        cnn_metrics_path = "saved_models/cnn_event_metrics.json"
+        fusion_metrics_path = "saved_models/cnn_tabular_fusion_metrics.json"
+        if os.path.exists(mrms_npz) and os.path.exists(mrms_manifest) and os.path.exists(cnn_path):
+            import tensorflow as tf
+            mrms = np.load(mrms_npz)
+            mrms_meta = pd.read_csv(mrms_manifest)
+            cnn_model = tf.keras.models.load_model(cnn_path)
+            labels = mrms["y"]
+            positive_indexes = np.where(labels == 1)[0]
+            default_index = 0
+            if len(positive_indexes):
+                for idx in positive_indexes:
+                    if mrms["X"][idx][:, :, 0].max() > 0.15:
+                        default_index = int(idx)
+                        break
+                else:
+                    default_index = int(positive_indexes[0])
+            sample_index = st.slider(
+                "MRMS sample index",
+                0,
+                len(labels) - 1,
+                default_index,
+                key="mrms_sample_index",
+            )
+            chip = mrms["X"][sample_index]
+            meta_row = mrms_meta.iloc[sample_index]
+            probability = float(
+                cnn_model.predict(chip[np.newaxis, ...], verbose=0).flatten()[0]
+            )
+            threshold = 0.5
+            if os.path.exists(cnn_metrics_path):
+                with open(cnn_metrics_path, "r", encoding="utf-8") as handle:
+                    threshold = float(json.load(handle).get("threshold", 0.5))
+
+            st.metric(
+                "CNN MRMS Event Probability",
+                f"{probability * 100.0:.1f}%",
+                delta=(
+                    "above tuned threshold"
+                    if probability >= threshold
+                    else "below tuned threshold"
+                ),
+            )
+            st.caption(
+                f"Station {meta_row['station_id']} · {meta_row['timestamp']} · "
+                f"Label {int(meta_row['label'])} · Threshold {threshold*100.0:.1f}%"
+            )
+
+            if os.path.exists(fusion_metrics_path):
+                with open(fusion_metrics_path, "r", encoding="utf-8") as handle:
+                    fusion_metrics = json.load(handle)
+                cols = st.columns(3)
+                cols[0].metric(
+                    "CNN + Tabular Fusion AUC",
+                    f"{fusion_metrics.get('test_auc', 0.0):.3f}",
+                )
+                cols[1].metric(
+                    "Fusion F1",
+                    f"{fusion_metrics.get('test_f1', 0.0):.3f}",
+                )
+                cols[2].metric(
+                    "Fusion Test Accuracy",
+                    f"{fusion_metrics.get('test_accuracy', 0.0) * 100.0:.1f}%",
+                )
+                st.caption(
+                    "Fusion combines MRMS CNN event probability with the NOAA tabular event model "
+                    f"using {fusion_metrics.get('split_strategy', 'the saved split')}."
+                )
+
+            heatmap = make_gradcam_heatmap(chip[np.newaxis, ...], cnn_model, "final_conv")
+            channel_titles = [
+                "Reflectivity Composite",
+                "Radar QPE 1H",
+                "0-2 km AzShear",
+                "CNN Grad-CAM",
+            ]
+            fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+            for axis, title, image in zip(
+                axes,
+                channel_titles,
+                [chip[:, :, 0], chip[:, :, 1], chip[:, :, 2], heatmap],
+            ):
+                sns.heatmap(image, ax=axis, cmap="viridis", cbar=False, xticklabels=False, yticklabels=False)
+                axis.set_title(title)
+            plt.tight_layout()
+            st.pyplot(fig)
+        else:
+            st.info("Real MRMS CNN artifacts are not available yet; use the synthetic demo below.")
+    except Exception as e:
+        st.warning(f"Could not render real MRMS CNN sample: {e}")
+
+    st.subheader("Synthetic CNN Activation Demo")
     
     grid_size = st.slider("Radar Visual Resolution (Grid Size)", 32, 128, 64, 16)
     
