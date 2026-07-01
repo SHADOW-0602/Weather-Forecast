@@ -50,9 +50,7 @@ def load_data_health():
 
 data_health = load_data_health()
 
-# ----------------------------------------------------
-# SIDEBAR CONTROL LAYOUT
-# ----------------------------------------------------
+# Sidebar Control Layout
 with st.sidebar:
     st.image("assets/logo.png", width=64)
     st.title("AeroClim Console")
@@ -92,22 +90,15 @@ with st.sidebar:
     )
     
     today = datetime.date.today()
-    if time_preset == "Past 30 Days":
-        start_date = today - datetime.timedelta(days=30)
-    elif time_preset == "Past 6 Months":
-        start_date = today - datetime.timedelta(days=180)
-    else:
-        start_date = today - datetime.timedelta(days=365)
-        
+    days_map = {"Past 30 Days": 30, "Past 6 Months": 180, "Full 12 Months": 365}
+    start_date = today - datetime.timedelta(days=days_map.get(time_preset, 30))
     end_date = today
     
     # Query force simulation option
     force_sim = st.toggle("Override with Synthetic Generator", value=False)
     st.caption("AeroClim v1.3 - Dynamic Ingestion Engine")
 
-# ----------------------------------------------------
-# MAIN APPLICATION CONTENT
-# ----------------------------------------------------
+# Main Application Content
 st.title("AeroClim Analytics Dashboard")
 st.markdown("An interactive platform evaluating weather anomalies, sea surface temperature dynamics, and machine learning models to assess hazards and predict extreme environmental risk indices.")
 
@@ -128,9 +119,7 @@ with st.spinner("Loading prepared meteorological records..."):
         force_simulation=force_sim
     )
 
-# ----------------------------------------------------
-# TAB 1: LIVE NOAA EXPLORER
-# ----------------------------------------------------
+# Tab 1: Live NOAA Explorer
 with tab_live:
     st.header("Historical Weather Station Explorer")
     
@@ -202,9 +191,7 @@ with tab_live:
     else:
         st.error("Severe network failure or empty dataset encountered. Please check fallback simulation settings.")
 
-# ----------------------------------------------------
-# TAB 2: SEA SURFACE TEMPERATURE
-# ----------------------------------------------------
+# Tab 2: Sea Surface Temperature
 with tab_sst:
     st.header("Ocean Surface Dynamics (SST Climate Records)")
     st.write("Warm Sea Surface Temperature (SST) anomalies transfer latent heat and moisture, driving extreme weather anomalies over adjacent regions.")
@@ -217,33 +204,21 @@ with tab_sst:
         
         # Determine target column
         basin_mapping = {
-            "SEATTLE": "sst_pacific_f",
-            "KCQT": "sst_pacific_f",
-            "NEW_YORK": "sst_atlantic_f",
-            "KPHL": "sst_atlantic_f",
-            "KJAX": "sst_atlantic_f",
-            "KCLT": "sst_atlantic_f",
-            "KHOU": "sst_gulf_f",
-            "PHOENIX": "sst_gulf_f",
-            "KIND": "sst_atlantic_f",
-            "KMDW": "sst_atlantic_f",
+            "SEATTLE": "sst_pacific_f", "KCQT": "sst_pacific_f",
+            "NEW_YORK": "sst_atlantic_f", "KPHL": "sst_atlantic_f", "KJAX": "sst_atlantic_f", 
+            "KCLT": "sst_atlantic_f", "KIND": "sst_atlantic_f", "KMDW": "sst_atlantic_f",
+            "KHOU": "sst_gulf_f", "PHOENIX": "sst_gulf_f"
         }
-        target_col = basin_mapping.get(selected_city_id)
-        if target_col is None:
-            if city_data["lon"] <= -100:
-                target_col = "sst_pacific_f"
-            elif city_data["lat"] <= 31.5 and city_data["lon"] <= -80:
-                target_col = "sst_gulf_f"
-            else:
-                target_col = "sst_atlantic_f"
-        if target_col and target_col in sst_df.columns:
+        target_col = basin_mapping.get(selected_city_id) or (
+            "sst_pacific_f" if city_data["lon"] <= -100 else
+            "sst_gulf_f" if city_data["lat"] <= 31.5 and city_data["lon"] <= -80 else
+            "sst_atlantic_f"
+        )
+        if target_col in sst_df.columns:
             sst_df["SST_Mean_Celsius"] = (sst_df[target_col] - 32) * 5.0 / 9.0
         else:
             avail_cols = [c for c in ["sst_pacific_f", "sst_atlantic_f", "sst_gulf_f"] if c in sst_df.columns]
-            if avail_cols:
-                sst_df["SST_Mean_Celsius"] = (sst_df[avail_cols].mean(axis=1) - 32) * 5.0 / 9.0
-            else:
-                sst_df["SST_Mean_Celsius"] = 18.0
+            sst_df["SST_Mean_Celsius"] = (sst_df[avail_cols].mean(axis=1) - 32) * 5.0 / 9.0 if avail_cols else 18.0
         
         latest_row = sst_df.iloc[-1]
         col1, col2, col3 = st.columns(3)
@@ -261,9 +236,7 @@ with tab_sst:
     else:
         st.warning("Ocean summary dataset `data/ocean.csv` not found.")
 
-# ----------------------------------------------------
-# TAB 3: EXTREME WEATHER & FLOOD RISK PREDICTOR
-# ----------------------------------------------------
+# Tab 3: Extreme Weather & Flood Risk Predictor
 with tab_ml:
     st.header("Prototype Next-Day Environmental Hazard Predictor")
     st.caption("Research output only — not an official weather warning or emergency product.")
@@ -363,14 +336,10 @@ with tab_ml:
         st.plotly_chart(fig_gauge, width="stretch")
         
         # Severity alert box
-        severity = prediction["Category"]
-        desc = prediction["Description"]
-        if severity == "Low Risk":
-            st.success(f"**{severity}**: {desc}")
-        elif severity == "Moderate Alert":
-            st.warning(f"**{severity}**: {desc}")
-        else:
-            st.error(f"**{severity}**: {desc}")
+        severity, desc = prediction["Category"], prediction["Description"]
+        if severity == "Low Risk": st.success(f"**{severity}**: {desc}")
+        elif severity == "Moderate Alert": st.warning(f"**{severity}**: {desc}")
+        else: st.error(f"**{severity}**: {desc}")
             
         st.markdown(f"**Diagnostic Explanation:**\n{prediction['Explanation']}")
         if prediction.get("Event_Prob") is not None:
@@ -406,9 +375,7 @@ with tab_ml:
         except Exception as e:
             st.error(f"Could not load global importances: {e}")
 
-# ----------------------------------------------------
-# TAB 4: RADAR HEATMAP & CNN ACTIVATIONS
-# ----------------------------------------------------
+# Tab 4: Radar Heatmap & CNN Activations
 with tab_radar:
     st.header("Precipitation Radar & CNN Activations (Seaborn Heatmaps)")
     st.write("This tab visualizes MRMS radar image chips and Convolutional Neural Network (CNN) class activations (Grad-CAM).")
@@ -429,12 +396,7 @@ with tab_radar:
             positive_indexes = np.where(labels == 1)[0]
             default_index = 0
             if len(positive_indexes):
-                for idx in positive_indexes:
-                    if mrms["X"][idx][:, :, 0].max() > 0.15:
-                        default_index = int(idx)
-                        break
-                else:
-                    default_index = int(positive_indexes[0])
+                default_index = next((int(idx) for idx in positive_indexes if mrms["X"][idx][:, :, 0].max() > 0.15), int(positive_indexes[0]))
             sample_index = st.slider(
                 "MRMS sample index",
                 0,
@@ -562,9 +524,7 @@ with tab_radar:
             except Exception as e:
                 st.error(f"Failed to generate heatmaps: {e}")
 
-# ----------------------------------------------------
-# TAB 5: DATA LINEAGE & SPECIFICATIONS
-# ----------------------------------------------------
+# Tab 5: Data Lineage & Specifications
 with tab_data:
     st.header("Data Lineage & Specifications")
     

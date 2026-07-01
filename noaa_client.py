@@ -130,7 +130,7 @@ class NOAAClient:
 
             normalized_noaa = {"date", "TMAX", "TMIN", "PRCP"}.issubset(df.columns)
 
-            # -- 1. Merge atmosphere data (dew point, wind, pressure, humidity) --
+            # 1. Merge atmosphere data
             repaired_atmosphere = os.path.join(
                 _NOAA_ATMOSPHERE_REPAIRED_DIR, f"{city_key.lower()}.csv"
             )
@@ -171,7 +171,7 @@ class NOAAClient:
                 df = df.drop(columns=existing)
                 df = pd.merge(df, atmosphere, on="date", how="left")
 
-            # -- 2. Merge soil moisture data --
+            # 2. Merge soil moisture data
             station_soil = os.path.join(
                 "data", "soil_moisture", f"{city_key.lower()}.csv"
             )
@@ -203,7 +203,7 @@ class NOAAClient:
             elif "SOIL_MOISTURE_OBSERVED" not in df.columns:
                 df["SOIL_MOISTURE_OBSERVED"] = 0
 
-            # -- 3. Merge climate_indices.csv (ENSO, PDO, NAO) --
+            # 3. Merge climate indices
             if os.path.exists("data/climate_indices.csv"):
                 ci = pd.read_csv("data/climate_indices.csv")
                 # drop enso_phase text column - keeps numeric indices only
@@ -222,7 +222,7 @@ class NOAAClient:
                     df["CLIMATE_INDEX_OBSERVED"] = observed.astype(int)
                     df[index_columns] = df[index_columns].ffill().bfill()
 
-            # -- 4. Convert dates. NOAA archives retain their real timestamps. --
+            # 4. Convert dates
             df["Date"] = pd.to_datetime(df["date"])
 
             for yr_col, new_col in [
@@ -232,7 +232,7 @@ class NOAAClient:
                 if yr_col in df.columns:
                     df[new_col] = df[yr_col]
 
-            # -- 6. Normalise atmosphere column names --
+            # 5. Normalise atmosphere column names
             rename_map = {
                 "dewpoint_f":      "DEWPOINT_F",
                 "windspeed_mph":   "WINDSPEED_MPH",
@@ -243,7 +243,7 @@ class NOAAClient:
             }
             df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
-            # -- 7. Date filter --
+            # 6. Date filter
             mask = (
                 (df["Date"] >= pd.to_datetime(start_date)) &
                 (df["Date"] <= pd.to_datetime(end_date))
@@ -266,7 +266,7 @@ class NOAAClient:
             if out.empty:
                 return None
 
-            # -- 8. Housekeeping --
+            # 7. Housekeeping
             source = "NOAA Daily Station Archive"
             if archived_window:
                 source += " (latest available window)"

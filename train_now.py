@@ -3,7 +3,7 @@ import datetime
 from noaa_client import CITIES, NOAAClient
 from ml_model import HazardPredictor
 
-# -- CLI arguments -----------------------------------------------------
+# CLI arguments
 parser = argparse.ArgumentParser(description="Train AeroClim multimodal models.")
 parser.add_argument(
     "--city", type=str, default="SEATTLE",
@@ -16,7 +16,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# -- Data loading ------------------------------------------------------
+# Data loading
 client    = NOAAClient()
 predictor = HazardPredictor()
 
@@ -40,7 +40,7 @@ if len(df) < 200:
         "tools/audit_data_health.py, or increase --days."
     )
 
-# -- Training ----------------------------------------------------------
+# Training
 def _progress(pct: int, msg: str) -> None:
     bar = "#" * (pct // 5) + "-" * (20 - pct // 5)
     print(f"  [{bar}] {pct:3d}%  {msg}")
@@ -58,7 +58,7 @@ print("    rf_model.pkl")
 print("    scaler_lstm.pkl  |  scaler_rf.pkl")
 print("    metrics.json")
 
-# -- Print summary metrics ---------------------------------------------
+# Print summary metrics
 if predictor.metrics:
     m = predictor.metrics
     print("\n[train_now] Performance summary (test set):")
